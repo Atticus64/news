@@ -16,10 +16,9 @@ fn view_area() -> Area {
 }
 
 pub fn get_markdonwwn_content(html: &str) -> String {
-    let bytes = &html.as_bytes()[..];
-    let markdown = from_read(bytes, 80);
+    let bytes = html.as_bytes();
 
-    markdown
+    from_read(bytes, 80)
 }
 
 pub fn generate_view(markdown: &str) -> Result<(), Error> {
