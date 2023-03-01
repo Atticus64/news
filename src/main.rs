@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let ans = Select::new("What new do you like to watch?", issues_options)
         .prompt()
-        .unwrap();
+        .expect("fail to read prompt news_issue user");
 
     let new_item = issues.iter().find(|new| new.title == ans);
 
@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let (news, options) = get_js_news(value.link.as_str()).await?;
         let answer = Select::new("What new do you like to watch?", options)
             .prompt()
-            .unwrap();
+            .expect("fail to read prompt newsLink");
 
         let new_struct = news.iter().find(|new| new.title == answer);
 
@@ -77,7 +77,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let url = response.url();
 
             // if is a video of youtube
-            if url.domain().unwrap().contains("youtube") {
+            if url
+                .domain()
+                .expect("error not is a domain")
+                .contains("youtube")
+            {
                 if webbrowser::open(new.link.as_str()).is_ok() {}
                 return Ok(());
             }
@@ -85,16 +89,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let view_select = Select::new("What view do you like to do?", vec!["Web", "Terminal"])
                 .with_help_message("Enter the view of the new")
                 .prompt()
-                .unwrap();
+                .expect("error reading prompt view select");
 
-            let view = View::from_str(view_select).unwrap();
+            let view = View::from_str(view_select).expect("failed to parse view");
             match view {
                 View::Terminal => {
                     println!("{link}");
 
                     let html = response.text().await?;
                     let markdown = get_markdonwwn_content(&html);
-                    generate_view(markdown.as_str()).unwrap();
+                    generate_view(markdown.as_str()).expect("failed to generate a markdown view");
                 }
                 View::Web => if webbrowser::open(new.link.as_str()).is_ok() {},
             }
@@ -121,10 +125,15 @@ async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error
 
     let mut vec_issues: Vec<Issue> = vec![];
     for issue in issues {
-        let url = issue.children().first().unwrap().attr("href").unwrap();
-        let number_issue = url.split('/').last().unwrap();
+        let url = issue
+            .children()
+            .first()
+            .expect("failed to get first element url")
+            .attr("href")
+            .expect("failed to get attr href element url");
+        let number_issue = url.split('/').last().expect("failed to get last url");
         let url_completed = format!("{JAVASCRIPT_WEEKLY_URL}/{number_issue}");
-        let name = issue.text().unwrap();
+        let name = issue.text().expect("failed to tranform to text name issue");
         let new = Issue {
             title: name,
             link: url_completed,
@@ -152,30 +161,30 @@ async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn 
         let uri = elem
             .select("a")
             .first()
-            .expect("algo")
+            .expect("fail to get first element of uri")
             .attr("href")
-            .unwrap();
+            .expect("fail to get attr href");
 
         let mut title = elem
             .children()
             .first()
-            .unwrap()
+            .expect("fail to get first element")
             .children()
             .first()
-            .unwrap()
+            .expect("fail to get first element children 1")
             .text()
-            .unwrap();
+            .expect("fail to conver a text");
 
         if title.len() < 10 {
             title = elem
                 .children()
                 .first()
-                .unwrap()
+                .expect("fail to get first element title")
                 .children()
                 .get(1)
-                .unwrap()
+                .expect("fail to get first element children title")
                 .text()
-                .unwrap();
+                .expect("fail to convert a text title children");
         }
 
         let new = NewsLink { title, link: uri };
