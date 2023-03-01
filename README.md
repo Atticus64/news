@@ -6,7 +6,7 @@ A nice, fast, confortable terminal CLI to check developer news
 
 * :rocket: Support for Linux, Windows and Mac (we need a collaborator with a mac support) 
 * :blue_book: Markdown like way to watch news in terminal
-* :globe_with_meridians: pen browser instead of terminal
+* :globe_with_meridians: open browser instead of terminal
 * :mag: Search across news list
 
 [:package:] Installation
