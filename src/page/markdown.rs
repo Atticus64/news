@@ -1,5 +1,6 @@
 use html2text::from_read;
 use std::io::{stdout, Write};
+use std::str::FromStr;
 use termimad::crossterm::{
     cursor::{Hide, Show},
     event::{self, Event, KeyCode::*, KeyEvent},
@@ -8,6 +9,24 @@ use termimad::crossterm::{
     terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use termimad::*;
+
+#[derive(Clone, Debug)]
+pub enum View {
+    Web,
+    Terminal,
+}
+
+impl FromStr for View {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<View, Self::Err> {
+        match input {
+            "Web" => Ok(View::Web),
+            "Terminal" => Ok(View::Terminal),
+            _ => Err(()),
+        }
+    }
+}
 
 fn view_area() -> Area {
     let mut area = Area::full_screen();
