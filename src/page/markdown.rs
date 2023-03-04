@@ -1,4 +1,7 @@
+use crate::scrape::link::NewsLink;
+use colored::*;
 use html2text::from_read;
+use inquire::Select;
 use std::io::{stdout, Write};
 use std::str::FromStr;
 use termimad::crossterm::{
@@ -47,7 +50,14 @@ pub fn generate_view(markdown: &str) -> Result<(), Error> {
     queue!(w, EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
     queue!(w, Hide)?; // hiding the cursor
-    let mut view = MadView::from(markdown.to_owned(), view_area(), skin);
+    let notification = format!(
+        "{}: k up, j down, K pageup, J pagedown",
+        "Navigation".green()
+    );
+    let md = format!("{notification} \n {markdown}");
+    // write!(&mut w, " {}: q or Esc", "Quit".red()).unwrap();
+    //  let skin = termimad::get_default_skin();
+    let mut view = MadView::from(md.to_string(), view_area(), skin);
     loop {
         view.write_on(&mut w)?;
         w.flush()?;
@@ -79,6 +89,48 @@ pub fn generate_view(markdown: &str) -> Result<(), Error> {
     w.flush()?;
     Ok(())
 }
+
+pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
+    let link = &new.link;
+    let response = reqwest::get(link).await?;
+    let url = response.url();
+
+    // if is a video of youtube
+    if url
+        .domain()
+        .expect("error not is a domain")
+        .contains("youtube")
+    {
+        if webbrowser::open(new.link.as_str()).is_ok() {}
+        return Ok(());
+    }
+
+    let view_select = Select::new("What view do you like to do?", vec!["Web", "Terminal"])
+        .with_help_message("Enter the view of the new")
+        .prompt()
+        .expect("error reading prompt view select");
+
+    let view = View::from_str(view_select).expect("failed to parse view");
+    match view {
+        View::Terminal => {
+            println!("{link}");
+
+            let html = response.text().await?;
+            let markdown = get_markdonwwn_content(&html);
+            if markdown.is_empty() {
+                println!("Content of new cannot be loaded in terminal");
+                println!("Opening browser instead");
+                if webbrowser::open(new.link.as_str()).is_ok() {}
+            } else {
+                generate_view(markdown.as_str()).expect("failed to generate a markdown view");
+            }
+        }
+        View::Web => if webbrowser::open(new.link.as_str()).is_ok() {},
+    }
+
+    Ok(())
+}
+
 fn make_skin() -> MadSkin {
     let mut skin = MadSkin::default();
     skin.table.align = Alignment::Center;

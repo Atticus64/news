@@ -49,3 +49,28 @@ pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
 
     Ok((vec_issues, issues_options))
 }
+
+/// Search for rust news of a specific issue
+/// And return two arrays one of the news object and other of options of news to search
+pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+    let response = reqwest::get(url).await?;
+
+    let text = response.text().await?;
+
+    let doc = Document::from(text);
+
+    let elements_li = doc.select("li");
+    let mut vec_issues: Vec<NewsLink> = vec![];
+    for elem in elements_li {
+        let uri = elem.children().first().unwrap().attr("href");
+        let title = elem.children().first().unwrap().text().unwrap();
+        if let Some(link) = uri {
+            let new = NewsLink { title, link };
+            vec_issues.push(new)
+        }
+    }
+
+    let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();
+
+    Ok((vec_issues, issues_options))
+}

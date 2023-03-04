@@ -42,3 +42,54 @@ pub async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
 
     Ok((vec_issues, issues_options))
 }
+
+pub async fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+    const RUST_WEEKLY_URL: &str = "https://this-week-in-rust.org/blog/archives/index.html";
+
+    let response = reqwest::get(RUST_WEEKLY_URL).await?;
+
+    let text = response.text().await?;
+
+    let doc = Document::from(text);
+
+    let issues = doc.select(".post-title");
+
+    let mut vec_issues: Vec<Issue> = vec![];
+    println!("issues: ");
+    for issue in issues {
+        let date_raw = issue
+            .select(".time-prefix")
+            .first()
+            .unwrap()
+            .children()
+            .first()
+            .unwrap()
+            .text()
+            .unwrap();
+        let title_raw = issue
+            .select(".text-right")
+            .first()
+            .unwrap()
+            .children()
+            .first()
+            .unwrap()
+            .text()
+            .unwrap();
+        let link = issue
+            .select(".text-right")
+            .first()
+            .unwrap()
+            .children()
+            .first()
+            .unwrap()
+            .attr("href")
+            .unwrap();
+        let title = format!("{title_raw} - {date_raw}");
+        let new = Issue { title, link };
+        vec_issues.push(new);
+    }
+
+    let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();
+
+    Ok((vec_issues, issues_options))
+}
