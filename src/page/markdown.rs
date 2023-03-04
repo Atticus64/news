@@ -61,7 +61,10 @@ pub fn generate_view(markdown: &str) -> Result<(), Error> {
                 Char('j') => view.try_scroll_lines(1),
                 Char('K') => view.try_scroll_pages(-1),
                 Char('J') => view.try_scroll_pages(1),
-                _ => break,
+                Char('q') => break,
+                Char('Q') => break,
+                Esc => break,
+                _ => {}
             },
             Ok(Event::Resize(..)) => {
                 queue!(w, Clear(ClearType::All))?;
