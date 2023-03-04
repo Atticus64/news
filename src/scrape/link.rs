@@ -15,7 +15,7 @@ pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
 
     let doc = Document::from(text);
 
-    let elements_li = doc.select(".desc");
+    let elements_li = doc.select(".mainlink");
     let mut vec_issues: Vec<NewsLink> = vec![];
     for elem in elements_li {
         let uri = elem
@@ -29,17 +29,11 @@ pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
             .children()
             .first()
             .expect("fail to get first element")
-            .children()
-            .first()
-            .expect("fail to get first element children 1")
             .text()
             .expect("fail to conver a text");
 
-        if title.len() < 10 {
+        if title.len() < 6 {
             title = elem
-                .children()
-                .first()
-                .expect("fail to get first element title")
                 .children()
                 .get(1)
                 .expect("fail to get first element children title")
