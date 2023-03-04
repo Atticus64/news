@@ -6,5 +6,5 @@ async fn test_get_js_news() {
         .await
         .unwrap();
     assert!(news.len() > 0, "News vector must be with items");
-    assert!(options.len() > 0, "Potions vector must be with items");
+    assert!(options.len() > 0, "Options vector must be with items");
 }
