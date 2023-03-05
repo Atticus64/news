@@ -11,12 +11,10 @@ A nice, fast, confortable terminal CLI to check developer news
 
 ## [:package:] Installation alpha
 
-### Unix, Linux
+### Macos and Linux
 
 ```bash
-wget https://github.com/Atticus64/news/releases/download/0.0.2/x86_64_linux_news
-
-chmod +x news
+curl -fsSL https://news-cli.deno.dev/bin/install.sh | sh
 ```
 
 ### Windows
@@ -24,15 +22,6 @@ chmod +x news
 ```pwsh
 iwr https://github.com/Atticus64/news/releases/download/0.0.1/x86_64_news.exe -OutFile news.exe
 ```
-
-### MacOs
-
-```bash
-wget https://github.com/Atticus64/news/releases/download/0.0.2/x86_64_news_macos
-
-chmod +x news
-```
-
 
 #### Todo
 
