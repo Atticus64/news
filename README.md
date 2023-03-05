@@ -2,6 +2,8 @@
 
 A nice, fast, confortable terminal CLI to check developer news
 
+<img src="./assets/news_cli.gif" width="800">
+
 ## [:hammer_and_wrench:] Features
 
 * :rocket: Support for Linux, Windows and Mac (we need a collaborator with a mac support) 
