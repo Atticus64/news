@@ -14,7 +14,7 @@ A nice, fast, confortable terminal CLI to check developer news
 ### Unix, Linux
 
 ```bash
-wget https://github.com/Atticus64/news/releases/download/v0.0.1/news
+wget https://github.com/Atticus64/news/releases/download/v0.0.2/x86_64_linux_news
 
 chmod +x news
 ```
@@ -22,11 +22,20 @@ chmod +x news
 ### Windows
 
 ```pwsh
-iwr https://github.com/Atticus64/news/releases/download/v0.0.1/news.exe -OutFile news.exe
+iwr https://github.com/Atticus64/news/releases/download/v0.0.1/x86_64_news.exe -OutFile news.exe
 ```
+
+### MacOs
+
+```bash
+wget https://github.com/Atticus64/news/releases/download/v0.0.2/x86_64_news_macos
+
+chmod +x news
+```
+
 
 #### Todo
 
 * [ ] Add news of c++
 * [ ] Add news of python
-* [ ] Add news of rust
+* [x] Add news of rust
