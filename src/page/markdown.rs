@@ -2,6 +2,7 @@ use crate::scrape::link::NewsLink;
 use colored::*;
 use html2text::from_read;
 use inquire::Select;
+use std::io::Stdout;
 use std::io::{stdout, Write};
 use std::str::FromStr;
 use termimad::crossterm::{
@@ -43,21 +44,7 @@ pub fn get_markdonwwn_content(html: &str) -> String {
     from_read(bytes, 80)
 }
 
-pub fn generate_view(markdown: &str) -> Result<(), Error> {
-    let skin = make_skin();
-
-    let mut w = stdout(); // we could also have used stderr
-    queue!(w, EnterAlternateScreen)?;
-    terminal::enable_raw_mode()?;
-    queue!(w, Hide)?; // hiding the cursor
-    let notification = format!(
-        "{}: k up, j down, K pageup, J pagedown",
-        "Navigation".green()
-    );
-    let md = format!("{notification} \n {markdown}");
-    // write!(&mut w, " {}: q or Esc", "Quit".red()).unwrap();
-    //  let skin = termimad::get_default_skin();
-    let mut view = MadView::from(md.to_string(), view_area(), skin);
+fn render_markdown(mut view: MadView, mut w: Stdout) -> Result<(), Box<dyn std::error::Error>> {
     loop {
         view.write_on(&mut w)?;
         w.flush()?;
@@ -87,6 +74,25 @@ pub fn generate_view(markdown: &str) -> Result<(), Error> {
     queue!(w, Show)?; // we must restore the cursor
     queue!(w, LeaveAlternateScreen)?;
     w.flush()?;
+    Ok(())
+}
+
+pub fn generate_view(markdown: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let skin = make_skin();
+
+    let mut w = stdout(); // we could also have used stderr
+    queue!(w, EnterAlternateScreen)?;
+    terminal::enable_raw_mode()?;
+    queue!(w, Hide)?; // hiding the cursor
+    let notification = format!(
+        "{}: k up, j down, K pageup, J pagedown",
+        "Navigation".green()
+    );
+    let md = format!("{notification} \n {markdown}");
+    // write!(&mut w, " {}: q or Esc", "Quit".red()).unwrap();
+    //  let skin = termimad::get_default_skin();
+    let view = MadView::from(md.to_string(), view_area(), skin);
+    render_markdown(view, w)?;
     Ok(())
 }
 
