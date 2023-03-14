@@ -11,8 +11,8 @@ impl FromStr for Lang {
 
     fn from_str(input: &str) -> Result<Lang, Self::Err> {
         match input {
-            "Check Javascript News" => Ok(Lang::JavaScript),
-            "Check Rust News" => Ok(Lang::Rust),
+            "JavaScript" => Ok(Lang::JavaScript),
+            "Rust" => Ok(Lang::Rust),
             _ => Err(()),
         }
     }
@@ -20,4 +20,13 @@ impl FromStr for Lang {
 
 pub fn get_lang(lang: &str) -> Lang {
     Lang::from_str(lang).unwrap()
+}
+
+pub fn get_lang_str(lang: Lang) -> String {
+    let str = match lang {
+        Lang::JavaScript => "JavaScript",
+        Lang::Rust => "Rust",
+    };
+
+    String::from(str)
 }

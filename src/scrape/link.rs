@@ -1,5 +1,6 @@
 use crabquery::Document;
 use std::error::Error;
+use terminal_spinners::{SpinnerBuilder, DOTS, MOON};
 
 #[derive(Debug)]
 pub struct NewsLink {
@@ -9,6 +10,11 @@ pub struct NewsLink {
 /// Search for javascript news of a specific issue
 /// And return two arrays one of the news object and other of options of news to search
 pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+    let handle = SpinnerBuilder::new()
+        .spinner(&MOON)
+        .text("Fetching JavaScript news")
+        .start();
+
     let response = reqwest::get(url).await?;
 
     let text = response.text().await?;
@@ -47,12 +53,18 @@ pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
 
     let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();
 
+    handle.done();
+
     Ok((vec_issues, issues_options))
 }
 
 /// Search for rust news of a specific issue
 /// And return two arrays one of the news object and other of options of news to search
 pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+    let handle = SpinnerBuilder::new()
+        .spinner(&DOTS)
+        .text(" Fetching Rust news")
+        .start();
     let response = reqwest::get(url).await?;
 
     let text = response.text().await?;
@@ -71,6 +83,8 @@ pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
     }
 
     let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();
+
+    handle.done();
 
     Ok((vec_issues, issues_options))
 }

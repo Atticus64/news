@@ -38,7 +38,7 @@ fn view_area() -> Area {
     area
 }
 
-pub fn get_markdonwwn_content(html: &str) -> String {
+pub fn get_markdown_content(html: &str) -> String {
     let bytes = html.as_bytes();
 
     from_read(bytes, 80)
@@ -122,7 +122,7 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
             println!("{link}");
 
             let html = response.text().await?;
-            let markdown = get_markdonwwn_content(&html);
+            let markdown = get_markdown_content(&html);
             if markdown.is_empty() {
                 println!("Content of new cannot be loaded in terminal");
                 println!("Opening browser instead");

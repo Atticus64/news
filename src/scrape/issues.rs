@@ -1,5 +1,6 @@
 use crabquery::Document;
 use std::error::Error;
+use terminal_spinners::{SpinnerBuilder, CLOCK, FLIP};
 
 #[derive(Debug)]
 pub struct Issue {
@@ -10,6 +11,10 @@ pub struct Issue {
 /// Search for javascript weekly issues news
 /// Return a array of Issues and options of that issues to search them
 pub async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+    let handle = SpinnerBuilder::new()
+        .spinner(&CLOCK)
+        .text("Fetching JavaScript Issues")
+        .start();
     const JAVASCRIPT_WEEKLY_URL: &str = "https://javascriptweekly.com/issues";
 
     let response = reqwest::get(JAVASCRIPT_WEEKLY_URL).await?;
@@ -40,10 +45,16 @@ pub async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
 
     let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();
 
+    handle.done();
+
     Ok((vec_issues, issues_options))
 }
 
 pub async fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+    let handle = SpinnerBuilder::new()
+        .spinner(&FLIP)
+        .text(" Fetching Rust Issues")
+        .start();
     const RUST_WEEKLY_URL: &str = "https://this-week-in-rust.org/blog/archives/index.html";
 
     let response = reqwest::get(RUST_WEEKLY_URL).await?;
@@ -90,6 +101,8 @@ pub async fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
     }
 
     let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();
+
+    handle.done();
 
     Ok((vec_issues, issues_options))
 }
