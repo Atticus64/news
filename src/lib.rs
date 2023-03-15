@@ -52,7 +52,6 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
 
         let new_item = issues.iter().find(|new| new.title == ans);
         if let Some(value) = new_item {
-            println!("{}", value.link);
             let (news, options) = match lang {
                 Lang::JavaScript => get_js_news(value.link.as_str()).await?,
                 Lang::Rust => get_rs_news(value.link.as_str()).await?,
