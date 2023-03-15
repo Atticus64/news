@@ -7,6 +7,7 @@ A nice, fast, confortable terminal CLI to check developer news
 ## [:hammer_and_wrench:] Features
 
 * :rocket: Support for Linux, Windows and Mac (we need a collaborator with a mac support) 
+* :tv: Open youtube if resource of new is a video
 * :blue_book: Markdown like way to watch news in terminal
 * :globe_with_meridians: open browser instead of terminal
 * :mag: Search across news list
@@ -27,6 +28,7 @@ iwr  https://news-cli.deno.dev/bin/install.ps1 | iex
 
 #### Todo
 
-* [ ] Add news of c++
-* [ ] Add news of python
+* [x] Add news of python
+* [x] Add news of Go
 * [x] Add news of rust
+* [ ] Add news of c++
