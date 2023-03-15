@@ -22,7 +22,7 @@ curl -fsSL https://news-cli.deno.dev/bin/install.sh | sh
 ### Windows
 
 ```pwsh
-iwr https://github.com/Atticus64/news/releases/download/0.0.1/x86_64_news.exe -OutFile news.exe
+iwr  https://news-cli.deno.dev/bin/install.ps1 | iex
 ```
 
 #### Todo
