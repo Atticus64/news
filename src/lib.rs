@@ -72,7 +72,10 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
             let lang_str = get_lang_str(lang);
             let phrase = format!("Do you want to watch more news of the lang {lang_str}");
 
-            let wants_research_lang = Confirm::new(&phrase).prompt().unwrap();
+            let wants_research_lang = Confirm::new(&phrase)
+                .with_help_message("Type yes or no")
+                .prompt()
+                .unwrap();
             if wants_research_lang == false {
                 break;
             }
