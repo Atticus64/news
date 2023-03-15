@@ -1,3 +1,5 @@
+use crate::lang::get_lang_str;
+use args::get_args;
 use colored::*;
 use inquire::{Confirm, Select};
 use lang::Lang;
@@ -7,13 +9,13 @@ use scrape::link::{get_js_news, get_rs_news};
 use std::error::Error;
 use std::str::FromStr;
 
-use crate::lang::get_lang_str;
-
+pub mod args;
 pub mod lang;
 pub mod page;
 pub mod scrape;
 
 pub async fn get_news() -> Result<(), Box<dyn Error>> {
+    let args = get_args();
     let options = vec!["Check News", "Exit"];
     println!("{} {}", "News".green(), "in terminal".blue());
 
