@@ -1,4 +1,4 @@
-use clap::{Arg, ArgMatches, Command};
+use clap::{ArgMatches, Command};
 
 pub fn get_args() -> ArgMatches {
     let opts = Command::new("news")

@@ -1,4 +1,6 @@
 use crate::lang::get_lang_str;
+use crate::scrape::issues::{get_go_issues_news, get_py_issues_news};
+use crate::scrape::link::{get_go_news, get_py_news};
 use args::get_args;
 use colored::*;
 use inquire::{Confirm, Select};
@@ -15,7 +17,7 @@ pub mod page;
 pub mod scrape;
 
 pub async fn get_news() -> Result<(), Box<dyn Error>> {
-    let args = get_args();
+    let _args = get_args();
     let options = vec!["Check News", "Exit"];
     println!("{} {}", "News".green(), "in terminal".blue());
 
@@ -31,7 +33,7 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
         }
     };
 
-    let langs = vec!["JavaScript", "Rust", "Go", "Python", "C++"];
+    let langs = vec!["JavaScript", "Rust", "Go", "Python"];
     let language: &str = Select::new("which language do you want to check news?", langs)
         .prompt()
         .unwrap();
@@ -40,6 +42,8 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
         let (issues, issues_options) = match lang {
             Lang::JavaScript => get_js_issues_news().await?,
             Lang::Rust => get_rs_issues_news().await?,
+            Lang::Go => get_go_issues_news().await?,
+            Lang::Python => get_py_issues_news().await?,
         };
 
         let ans = Select::new("Which new would you like to watch?", issues_options)
@@ -48,9 +52,12 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
 
         let new_item = issues.iter().find(|new| new.title == ans);
         if let Some(value) = new_item {
+            println!("{}", value.link);
             let (news, options) = match lang {
                 Lang::JavaScript => get_js_news(value.link.as_str()).await?,
                 Lang::Rust => get_rs_news(value.link.as_str()).await?,
+                Lang::Go => get_go_news(value.link.as_str()).await?,
+                Lang::Python => get_py_news(value.link.as_str()).await?,
             };
 
             let answer = Select::new("What new do you like to watch?", options)

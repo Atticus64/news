@@ -4,6 +4,8 @@ use std::str::FromStr;
 pub enum Lang {
     JavaScript,
     Rust,
+    Go,
+    Python,
 }
 
 impl FromStr for Lang {
@@ -13,6 +15,8 @@ impl FromStr for Lang {
         match input {
             "JavaScript" => Ok(Lang::JavaScript),
             "Rust" => Ok(Lang::Rust),
+            "Go" => Ok(Lang::Go),
+            "Python" => Ok(Lang::Python),
             _ => Err(()),
         }
     }
@@ -26,6 +30,8 @@ pub fn get_lang_str(lang: Lang) -> String {
     let str = match lang {
         Lang::JavaScript => "JavaScript",
         Lang::Rust => "Rust",
+        Lang::Go => "Go",
+        Lang::Python => "Python",
     };
 
     String::from(str)
