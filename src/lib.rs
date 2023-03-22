@@ -9,12 +9,14 @@ use page::markdown::show_news;
 use scrape::issues::{get_js_issues_news, get_rs_issues_news};
 use scrape::link::{get_js_news, get_rs_news};
 use std::error::Error;
+use std::process::exit;
 use std::str::FromStr;
 
 pub mod args;
 pub mod lang;
 pub mod page;
 pub mod scrape;
+pub mod utils;
 
 pub async fn get_news() -> Result<(), Box<dyn Error>> {
     let _args = get_args();
@@ -34,11 +36,17 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
     };
 
     let langs = vec!["JavaScript", "Rust", "Go", "Python"];
-    let language: &str = Select::new("which language do you want to check news?", langs)
-        .prompt()
-        .unwrap();
+    let language = match Select::new("which language do you want to check news?", langs).prompt() {
+        Ok(lang) => lang,
+        Err(_) => "Cancel",
+    };
+
+    if language == "Cancel" {
+        manage_exit("Error lang no provided, operation cancelled")
+    }
+
     loop {
-        let lang = Lang::from_str(language).unwrap();
+        let lang = Lang::from_str(language).expect("Fail in convert language to type Lang");
         let (issues, issues_options) = match lang {
             Lang::JavaScript => get_js_issues_news().await?,
             Lang::Rust => get_rs_issues_news().await?,
@@ -46,11 +54,17 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
             Lang::Python => get_py_issues_news().await?,
         };
 
-        let ans = Select::new("Which new would you like to watch?", issues_options)
-            .prompt()
-            .expect("fail to read prompt news_issue user");
+        let novelty =
+            match Select::new("Which new would you like to watch?", issues_options).prompt() {
+                Ok(new) => new,
+                Err(_) => "Cancel".to_string(),
+            };
 
-        let new_item = issues.iter().find(|new| new.title == ans);
+        if novelty.as_str() == "Cancel" {
+            manage_exit("fail to read prompt news_issue user")
+        }
+
+        let new_item = issues.iter().find(|new| new.title == novelty);
         if let Some(value) = new_item {
             let (news, options) = match lang {
                 Lang::JavaScript => get_js_news(value.link.as_str()).await?,
@@ -59,9 +73,14 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
                 Lang::Python => get_py_news(value.link.as_str()).await?,
             };
 
-            let answer = Select::new("What new do you like to watch?", options)
-                .prompt()
-                .expect("fail to read prompt newsLink");
+            let answer = match Select::new("What new do you like to watch?", options).prompt() {
+                Ok(ans) => ans,
+                Err(_) => "Cancel".to_string(),
+            };
+
+            if answer.as_str() == "Cancel" {
+                manage_exit("fail to read prompt newsLink")
+            }
 
             let new_struct = news.iter().find(|new| new.title == answer);
 
@@ -72,15 +91,27 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
             let lang_str = get_lang_str(lang);
             let phrase = format!("Do you want to watch more news of the lang {lang_str}");
 
-            let wants_research_lang = Confirm::new(&phrase)
+            let wants_research_lang = match Confirm::new(&phrase)
                 .with_help_message("Type yes or no")
                 .prompt()
-                .unwrap();
-            if wants_research_lang == false {
+            {
+                Ok(ans) => ans,
+                Err(_) => {
+                    manage_exit("Cancel prompt wants research");
+                    true
+                }
+            };
+
+            if !wants_research_lang {
                 break;
             }
         }
     }
 
     Ok(())
+}
+
+fn manage_exit(err: &str) -> () {
+    println!("Operation cancelled: {err}");
+    exit(1);
 }

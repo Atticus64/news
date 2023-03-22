@@ -89,7 +89,6 @@ pub fn generate_view(markdown: &str) -> Result<(), Box<dyn std::error::Error>> {
         "Navigation".green()
     );
     let md = format!("{notification} \n {markdown}");
-    // write!(&mut w, " {}: q or Esc", "Quit".red()).unwrap();
     //  let skin = termimad::get_default_skin();
     let view = MadView::from(md.to_string(), view_area(), skin);
     render_markdown(view, w)?;

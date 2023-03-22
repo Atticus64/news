@@ -74,8 +74,17 @@ pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
     let elements_li = doc.select("li");
     let mut vec_issues: Vec<NewsLink> = vec![];
     for elem in elements_li {
-        let uri = elem.children().first().unwrap().attr("href");
-        let title = elem.children().first().unwrap().text().unwrap();
+        let uri = elem
+            .children()
+            .first()
+            .expect("Failed to get first element")
+            .attr("href");
+        let title = elem
+            .children()
+            .first()
+            .expect("Failed to get first element")
+            .text()
+            .expect("Failed to convert to string");
         if let Some(link) = uri {
             let new = NewsLink { title, link };
             vec_issues.push(new)
@@ -157,7 +166,12 @@ pub async fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
             let source = value.attr("href");
             if let Some(link) = source {
                 if links.iter().any(|l| l.contains(&link)) == false {
-                    let title = elem.children().first().unwrap().text().unwrap();
+                    let title = elem
+                        .children()
+                        .first()
+                        .expect("Failed to get first child element")
+                        .text()
+                        .expect("Failed to tranform to String");
                     let new = NewsLink {
                         title,
                         link: link.clone(),

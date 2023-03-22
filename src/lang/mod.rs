@@ -23,7 +23,7 @@ impl FromStr for Lang {
 }
 
 pub fn get_lang(lang: &str) -> Lang {
-    Lang::from_str(lang).unwrap()
+    Lang::from_str(lang).expect("Failed fo get lang from &str")
 }
 
 pub fn get_lang_str(lang: Lang) -> String {

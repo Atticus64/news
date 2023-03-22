@@ -70,30 +70,30 @@ pub async fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
         let date_raw = issue
             .select(".time-prefix")
             .first()
-            .unwrap()
+            .expect("failed to get first element")
             .children()
             .first()
-            .unwrap()
+            .expect("failed to get first element children date issues rs")
             .text()
-            .unwrap();
+            .expect("Failed to converto to String");
         let title_raw = issue
             .select(".text-right")
             .first()
-            .unwrap()
+            .expect("Failed to get first element")
             .children()
             .first()
-            .unwrap()
+            .expect("Failed to get first element children title issues rs")
             .text()
-            .unwrap();
+            .expect("Failed to convert to String");
         let link = issue
             .select(".text-right")
             .first()
-            .unwrap()
+            .expect("Failed to get first element")
             .children()
             .first()
-            .unwrap()
+            .expect("Failed to get first element")
             .attr("href")
-            .unwrap();
+            .expect("Failed to get attr element");
         let title = format!("{title_raw} - {date_raw}");
         let new = Issue { title, link };
         vec_issues.push(new);
@@ -163,10 +163,27 @@ pub async fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
 
     let mut vec_issues: Vec<Issue> = vec![];
     for issue in issues {
-        let title = issue.children().first().unwrap().text().unwrap();
-        let link = issue.children().first().unwrap().attr("href").unwrap();
-        let issue_num = link.split("/").last().unwrap();
+        let title = issue
+            .children()
+            .first()
+            .expect("Failed to get first children title rust ")
+            .text()
+            .expect("Failed to convert title rust to String");
+
+        let link = issue
+            .children()
+            .first()
+            .expect("Failed to get first element")
+            .attr("href")
+            .expect("Failed to get attr link rust issue");
+
+        let issue_num = link
+            .split("/")
+            .last()
+            .expect("Failed to get las item issues");
+
         let source = format!("{PYTHON_WEEKLY_URL}/{issue_num}");
+
         let new = Issue {
             title,
             link: source,
