@@ -71,7 +71,9 @@ pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
 
     let doc = Document::from(text);
 
-    let elements_li = doc.select("li");
+    let post = doc.select(".post-content");
+    let elem = post.first().unwrap();
+    let elements_li = elem.select("li");
     let mut vec_issues: Vec<NewsLink> = vec![];
     for elem in elements_li {
         let uri = elem
@@ -84,10 +86,13 @@ pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
             .first()
             .expect("Failed to get first element")
             .text()
-            .expect("Failed to convert to string");
+            .unwrap();
+
         if let Some(link) = uri {
-            let new = NewsLink { title, link };
-            vec_issues.push(new)
+            if !title.is_empty() {
+                let new = NewsLink { title, link };
+                vec_issues.push(new)
+            }
         }
     }
 

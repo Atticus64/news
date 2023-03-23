@@ -3,7 +3,7 @@ use crate::scrape::issues::{get_go_issues_news, get_py_issues_news};
 use crate::scrape::link::{get_go_news, get_py_news};
 use args::get_args;
 use colored::*;
-use inquire::{Confirm, Select};
+use inquire::Select;
 use lang::Lang;
 use page::markdown::show_news;
 use scrape::issues::{get_js_issues_news, get_rs_issues_news};
@@ -91,18 +91,15 @@ pub async fn get_news() -> Result<(), Box<dyn Error>> {
             let lang_str = get_lang_str(lang);
             let phrase = format!("Do you want to watch more news of the lang {lang_str}");
 
-            let wants_research_lang = match Confirm::new(&phrase)
-                .with_help_message("Type yes or no")
+            let wants_research_lang = match Select::new(&phrase, vec!["No", "Yes"])
+                .with_help_message("Select Yes or No")
                 .prompt()
             {
                 Ok(ans) => ans,
-                Err(_) => {
-                    manage_exit("Cancel prompt wants research");
-                    true
-                }
+                Err(_) => "Cancel",
             };
 
-            if !wants_research_lang {
+            if wants_research_lang == "Cancel" || wants_research_lang == "No" {
                 break;
             }
         }

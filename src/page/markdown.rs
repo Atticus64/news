@@ -1,4 +1,6 @@
+use crate::manage_exit;
 use crate::scrape::link::NewsLink;
+use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use colored::*;
 use html2text::from_read;
 use inquire::Select;
@@ -44,7 +46,11 @@ pub fn get_markdown_content(html: &str) -> String {
     from_read(bytes, 80)
 }
 
-fn render_markdown(mut view: MadView, mut w: Stdout) -> Result<(), Box<dyn std::error::Error>> {
+fn render_markdown(
+    mut view: MadView,
+    mut w: Stdout,
+    link: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
     loop {
         view.write_on(&mut w)?;
         w.flush()?;
@@ -61,6 +67,15 @@ fn render_markdown(mut view: MadView, mut w: Stdout) -> Result<(), Box<dyn std::
                 Char('q') => break,
                 Char('Q') => break,
                 Esc => break,
+                Char('y') => {
+                    let mut ctx =
+                        ClipboardContext::new().expect("Failed to create clipboard context");
+                    ctx.set_contents(link.to_owned()).unwrap();
+                    // Notification::new()
+                    //     .summary("News CLI")
+                    //     .body("url has been copied to the clipboard")
+                    //     .show()?;
+                }
                 _ => {}
             },
             Ok(Event::Resize(..)) => {
@@ -77,7 +92,7 @@ fn render_markdown(mut view: MadView, mut w: Stdout) -> Result<(), Box<dyn std::
     Ok(())
 }
 
-pub fn generate_view(markdown: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn generate_view(markdown: &str, link: &str) -> Result<(), Box<dyn std::error::Error>> {
     let skin = make_skin();
 
     let mut w = stdout(); // we could also have used stderr
@@ -85,18 +100,20 @@ pub fn generate_view(markdown: &str) -> Result<(), Box<dyn std::error::Error>> {
     terminal::enable_raw_mode()?;
     queue!(w, Hide)?; // hiding the cursor
     let notification = format!(
-        "{}: k up, j down, K pageup, J pagedown",
-        "Navigation".green()
+        "{}: k up, j down, K pageup, J pagedown {}: Esc and q",
+        "Navigation".green(),
+        "Exit".red()
     );
     let md = format!("{notification} \n {markdown}");
     //  let skin = termimad::get_default_skin();
     let view = MadView::from(md.to_string(), view_area(), skin);
-    render_markdown(view, w)?;
+    render_markdown(view, w, link)?;
     Ok(())
 }
 
 pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
     let link = &new.link;
+    let title = &new.title;
     let response = reqwest::get(link).await?;
     let url = response.url();
 
@@ -110,15 +127,22 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
         return Ok(());
     }
 
-    let view_select = Select::new("What view do you like to do?", vec!["Web", "Terminal"])
+    let view_select = match Select::new("What view do you like to do?", vec!["Web", "Terminal"])
         .with_help_message("Enter the view of the new")
         .prompt()
-        .expect("error reading prompt view select");
+    {
+        Ok(ans) => ans,
+        Err(_) => "Cancel",
+    };
+
+    if view_select == "Cancel" {
+        manage_exit("No view provided")
+    }
 
     let view = View::from_str(view_select).expect("failed to parse view");
     match view {
         View::Terminal => {
-            println!("{link}");
+            println!("Link {title}: {link}");
 
             let html = response.text().await?;
             let markdown = get_markdown_content(&html);
@@ -127,7 +151,7 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
                 println!("Opening browser instead");
                 if webbrowser::open(new.link.as_str()).is_ok() {}
             } else {
-                generate_view(markdown.as_str()).expect("failed to generate a markdown view");
+                generate_view(markdown.as_str(), link).expect("failed to generate a markdown view");
             }
         }
         View::Web => if webbrowser::open(new.link.as_str()).is_ok() {},
