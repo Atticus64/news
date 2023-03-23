@@ -1,0 +1,8 @@
+#!/bin/sh
+
+mv target/x86_64-pc-windows-gnu/release/news.exe x86_64_news.exe
+
+mv target/release/news x86_64_linux_news
+
+mv target/release/ x86_64_news_macos
+
