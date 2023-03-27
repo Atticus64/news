@@ -12,11 +12,11 @@ use std::error::Error;
 use std::process::exit;
 use std::str::FromStr;
 
-pub mod args;
-pub mod lang;
-pub mod page;
-pub mod scrape;
-pub mod utils;
+mod args;
+mod lang;
+mod page;
+mod scrape;
+mod utils;
 
 pub async fn get_news() -> Result<(), Box<dyn Error>> {
     let _args = get_args();

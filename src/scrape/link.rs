@@ -177,12 +177,14 @@ pub async fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
                         .expect("Failed to get first child element")
                         .text()
                         .expect("Failed to tranform to String");
-                    let new = NewsLink {
-                        title,
-                        link: link.clone(),
-                    };
 
-                    vec_issues.push(new)
+                    if !title.is_empty() {
+                        let new = NewsLink {
+                            title,
+                            link: link.clone(),
+                        };
+                        vec_issues.push(new)
+                    }
                 }
                 links.push(link);
             }
