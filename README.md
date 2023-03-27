@@ -12,7 +12,7 @@ A nice, fast, confortable terminal CLI to check developer news
 * :globe_with_meridians: open browser instead of terminal
 * :mag: Search across news list
 
-## [:package:] Installation alpha
+## [:package:] Installation 
 
 ### Macos and Linux
 
