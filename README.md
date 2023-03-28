@@ -6,7 +6,7 @@ A nice, fast, confortable terminal CLI to check developer news
 
 ## [:hammer_and_wrench:] Features
 
-* :rocket: Support for Linux, Windows and Mac (we need a collaborator with a mac support) 
+* :rocket: Support for Linux, Windows and Mac 
 * :tv: Open youtube if resource of new is a video
 * :blue_book: Markdown like way to watch news in terminal
 * :globe_with_meridians: open browser instead of terminal
