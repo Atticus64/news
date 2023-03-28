@@ -28,7 +28,10 @@ iwr  https://news-cli.deno.dev/bin/install.ps1 | iex
 
 #### Todo
 
-* [x] Add news of python
+
+* [x] Add news of JavaScript
+* [x] Add news of Python
 * [x] Add news of Go
-* [x] Add news of rust
-* [ ] Add news of c++
+* [x] Add news of Rust
+* [ ] Add news of C++
+* [ ] Add news of Php
