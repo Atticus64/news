@@ -1,4 +1,4 @@
-use news::scrape::issues::get_rs_issues_news;
+use news::scrape::issues::rust::get_rs_issues_news;
 
 #[tokio::test]
 async fn test_get_js_news() {

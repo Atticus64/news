@@ -1,44 +1,12 @@
-use crate::manage_exit;
+use crate::page::render::generate_view;
+
 use crate::scrape::link::NewsLink;
-use cli_clipboard::{ClipboardContext, ClipboardProvider};
-use colored::*;
+use crate::tui::select::manage_exit;
 use html2text::from_read;
 use inquire::Select;
-use std::io::Stdout;
-use std::io::{stdout, Write};
 use std::str::FromStr;
-use termimad::crossterm::{
-    cursor::{Hide, Show},
-    event::{self, Event, KeyCode::*, KeyEvent},
-    queue,
-    style::Color::*,
-    terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
-};
-use termimad::*;
 
-#[derive(Clone, Debug)]
-pub enum View {
-    Web,
-    Terminal,
-}
-
-impl FromStr for View {
-    type Err = ();
-
-    fn from_str(input: &str) -> Result<View, Self::Err> {
-        match input {
-            "Web" => Ok(View::Web),
-            "Terminal" => Ok(View::Terminal),
-            _ => Err(()),
-        }
-    }
-}
-
-fn view_area() -> Area {
-    let mut area = Area::full_screen();
-    area.pad_for_max_width(120); // we don't want a too wide text column
-    area
-}
+use super::view::View;
 
 pub fn get_markdown_content(html: &str) -> String {
     let bytes = html.as_bytes();
@@ -46,71 +14,7 @@ pub fn get_markdown_content(html: &str) -> String {
     from_read(bytes, 80)
 }
 
-fn render_markdown(
-    mut view: MadView,
-    mut w: Stdout,
-    link: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
-    loop {
-        view.write_on(&mut w)?;
-        w.flush()?;
-        match event::read() {
-            Ok(Event::Key(KeyEvent { code, .. })) => match code {
-                Up => view.try_scroll_lines(-1),
-                Down => view.try_scroll_lines(1),
-                PageUp => view.try_scroll_pages(-1),
-                PageDown => view.try_scroll_pages(1),
-                Char('k') => view.try_scroll_lines(-1),
-                Char('j') => view.try_scroll_lines(1),
-                Char('K') => view.try_scroll_pages(-1),
-                Char('J') => view.try_scroll_pages(1),
-                Char('q') => break,
-                Char('Q') => break,
-                Esc => break,
-                Char('y') => {
-                    let mut ctx =
-                        ClipboardContext::new().expect("Failed to create clipboard context");
-                    ctx.set_contents(link.to_owned()).unwrap();
-                    // Notification::new()
-                    //     .summary("News CLI")
-                    //     .body("url has been copied to the clipboard")
-                    //     .show()?;
-                }
-                _ => {}
-            },
-            Ok(Event::Resize(..)) => {
-                queue!(w, Clear(ClearType::All))?;
-                view.resize(&view_area());
-            }
-            _ => {}
-        }
-    }
-    terminal::disable_raw_mode()?;
-    queue!(w, Show)?; // we must restore the cursor
-    queue!(w, LeaveAlternateScreen)?;
-    w.flush()?;
-    Ok(())
-}
-
-pub fn generate_view(markdown: &str, link: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let skin = make_skin();
-
-    let mut w = stdout(); // we could also have used stderr
-    queue!(w, EnterAlternateScreen)?;
-    terminal::enable_raw_mode()?;
-    queue!(w, Hide)?; // hiding the cursor
-    let notification = format!(
-        "{}: k up, j down, K pageup, J pagedown {}: Esc and q",
-        "Navigation".green(),
-        "Exit".red()
-    );
-    let md = format!("{notification} \n {markdown}");
-    //  let skin = termimad::get_default_skin();
-    let view = MadView::from(md.to_string(), view_area(), skin);
-    render_markdown(view, w, link)?;
-    Ok(())
-}
-
+/// render news in the terminal std output
 pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
     let link = &new.link;
     let title = &new.title;
@@ -127,13 +31,10 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
         return Ok(());
     }
 
-    let view_select = match Select::new("What view do you like to do?", vec!["Web", "Terminal"])
+    let view_select = Select::new("What view do you like to do?", vec!["Web", "Terminal"])
         .with_help_message("Enter the view of the new")
         .prompt()
-    {
-        Ok(ans) => ans,
-        Err(_) => "Cancel",
-    };
+        .unwrap_or("Cancel");
 
     if view_select == "Cancel" {
         manage_exit("No view provided")
@@ -158,15 +59,4 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
     }
 
     Ok(())
-}
-
-fn make_skin() -> MadSkin {
-    let mut skin = MadSkin::default();
-    skin.table.align = Alignment::Center;
-    skin.set_headers_fg(AnsiValue(178));
-    skin.bold.set_fg(Yellow);
-    skin.italic.set_fg(Magenta);
-    skin.scrollbar.thumb.set_fg(AnsiValue(178));
-    skin.code_block.align = Alignment::Center;
-    skin
 }
