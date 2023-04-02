@@ -25,6 +25,7 @@ fn render_markdown(
     loop {
         view.write_on(&mut w)?;
         w.flush()?;
+
         let kill_render = listen_keymaps(&mut view, &mut w, link);
         if kill_render {
             break;
@@ -39,7 +40,6 @@ fn render_markdown(
 
 fn listen_keymaps(view: &mut MadView, w: &mut Stdout, link: &str) -> bool {
     let mut kill_render = false;
-
     match event::read() {
         Ok(Event::Key(KeyEvent { code, .. })) => match code {
             Up => view.try_scroll_lines(-1),

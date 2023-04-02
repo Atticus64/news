@@ -30,7 +30,7 @@ pub async fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn 
             .first()
             .unwrap()
             .text()
-            .unwrap();
+            .expect("Failed to get");
         let issue_number = issue
             .children()
             .get(1)
@@ -39,11 +39,16 @@ pub async fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn 
             .first()
             .unwrap()
             .attr("href")
-            .unwrap();
+            .expect("Failed to get");
         let vec: Vec<_> = raw_title.split('-').collect();
-        let title_str = *vec.get(1).unwrap();
+        let title_str = *vec.get(1).expect("Failed to get");
         let title = String::from(title_str);
-        let date = issue.children().first().unwrap().text().unwrap();
+        let date = issue
+            .children()
+            .first()
+            .unwrap()
+            .text()
+            .expect("Failed to get");
         let name = format!("{title} - {date}");
         let url_completed = format!("https://cpp.libhunt.com{issue_number}");
         let new = Issue {
@@ -86,7 +91,7 @@ pub async fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
         .first()
         .unwrap()
         .text()
-        .unwrap();
+        .expect("Failed to get");
     let issue_number = first
         .children()
         .get(1)
@@ -95,11 +100,16 @@ pub async fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
         .first()
         .unwrap()
         .attr("href")
-        .unwrap();
+        .expect("Failed to get");
     let vec: Vec<_> = raw_title.split('-').collect();
-    let title_str = *vec.get(1).unwrap();
+    let title_str = *vec.get(1).expect("Failed to get");
     let title = String::from(title_str);
-    let date = first.children().first().unwrap().text().unwrap();
+    let date = first
+        .children()
+        .first()
+        .unwrap()
+        .text()
+        .expect("Failed to get");
     let name = format!("{title} - {date}");
     let url_completed = format!("https://cpp.libhunt.com{issue_number}");
     let new = Issue {

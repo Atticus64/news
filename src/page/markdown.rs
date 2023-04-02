@@ -2,22 +2,22 @@ use crate::page::render::generate_view;
 
 use crate::scrape::link::NewsLink;
 use crate::tui::select::manage_exit;
-use html2text::from_read;
+use august;
+// use html2text::from_read;
 use inquire::Select;
 use std::str::FromStr;
 
 use super::view::View;
 
 pub fn get_markdown_content(html: &str) -> String {
-    let bytes = html.as_bytes();
-
-    from_read(bytes, 80)
+    // let bytes = html.as_bytes();
+    // from_read(bytes, 80)
+    august::convert(html, 79)
 }
 
 /// render news in the terminal std output
 pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
     let link = &new.link;
-    let title = &new.title;
     let response = reqwest::get(link).await?;
     let url = response.url();
 
@@ -43,8 +43,6 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
     let view = View::from_str(view_select).expect("failed to parse view");
     match view {
         View::Terminal => {
-            println!("Link {title}: {link}");
-
             let html = response.text().await?;
             let markdown = get_markdown_content(&html);
             if markdown.is_empty() {

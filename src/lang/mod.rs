@@ -41,6 +41,6 @@ impl FromStr for Lang {
 
 impl Lang {
     pub fn get_langs_str() -> Vec<&'static str> {
-        vec!["Javascript", "Go", "Rust", "Php", "Python"]
+        vec!["Javascript", "Go", "Rust", "Php", "Python", "Cpp"]
     }
 }
