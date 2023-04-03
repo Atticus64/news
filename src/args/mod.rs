@@ -18,6 +18,13 @@ pub fn get_command() -> Command {
                 .help("Choose a lang for the news"),
         )
         .arg(
+            Arg::new("vers")
+                .short('v')
+                .required(false)
+                .num_args(0)
+                .help("Show news version"),
+        )
+        .arg(
             Arg::new("list")
                 .long("list")
                 .num_args(0)
@@ -32,13 +39,31 @@ pub fn get_command() -> Command {
                 .required(false)
                 .help("Check all news in the history of langs"),
         )
+        .arg(
+            Arg::new("resume")
+                .long("resume")
+                .short('r')
+                .num_args(0)
+                .required(false)
+                .help("Resume the new selected by IA technology"),
+        )
         .subcommand(
-            Command::new("today").about("Check the latest news").arg(
-                Arg::new("lang")
-                    .short('l')
-                    .long("lang")
-                    .help("Lang of the news"),
-            ),
+            Command::new("today")
+                .about("Check the latest news")
+                .arg(
+                    Arg::new("lang")
+                        .short('l')
+                        .required(false)
+                        .long("lang")
+                        .help("Lang of the news"),
+                )
+                .arg(
+                    Arg::new("resume")
+                        .short('r')
+                        .num_args(0)
+                        .required(false)
+                        .help("Resume the new selected by IA technology"),
+                ),
         )
 }
 

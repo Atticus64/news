@@ -1,6 +1,6 @@
 use inquire::Select;
 
-pub fn get_answer<'a>(message: &'a str, options: Vec<&'a str>, err_message: &str) -> &'a str {
+pub fn get_answer<'a>(message: &'a str, options: Vec<String>, err_message: &str) -> String {
     let answer = Select::new(message, options).prompt();
 
     match answer {

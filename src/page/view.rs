@@ -11,6 +11,7 @@ pub fn view_area() -> Area {
 pub enum View {
     Web,
     Terminal,
+    Ia,
 }
 
 impl FromStr for View {
@@ -20,6 +21,7 @@ impl FromStr for View {
         match input {
             "Web" => Ok(View::Web),
             "Terminal" => Ok(View::Terminal),
+            "Ia Draft" => Ok(View::Ia),
             _ => Err(()),
         }
     }

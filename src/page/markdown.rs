@@ -1,9 +1,9 @@
 use crate::page::render::generate_view;
 
+use crate::scrape::ia::get_resume;
 use crate::scrape::link::NewsLink;
 use crate::tui::select::manage_exit;
 use august;
-// use html2text::from_read;
 use inquire::Select;
 use std::str::FromStr;
 
@@ -31,10 +31,13 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
         return Ok(());
     }
 
-    let view_select = Select::new("What view do you like to do?", vec!["Web", "Terminal"])
-        .with_help_message("Enter the view of the new")
-        .prompt()
-        .unwrap_or("Cancel");
+    let view_select = Select::new(
+        "What view do you like to do?",
+        vec!["Web", "Terminal", "Ia Draft"],
+    )
+    .with_help_message("Enter the view of the new")
+    .prompt()
+    .unwrap_or("Cancel");
 
     if view_select == "Cancel" {
         manage_exit("No view provided")
@@ -45,6 +48,7 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
         View::Terminal => {
             let html = response.text().await?;
             let markdown = get_markdown_content(&html);
+
             if markdown.is_empty() {
                 println!("Content of new cannot be loaded in terminal");
                 println!("Opening browser instead");
@@ -53,8 +57,16 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
                 generate_view(markdown.as_str(), link).expect("failed to generate a markdown view");
             }
         }
-        View::Web => if webbrowser::open(new.link.as_str()).is_ok() {},
+        View::Web => {
+            webbrowser::open(new.link.as_str())?;
+        }
+        View::Ia => {
+            let html = response.text().await?;
+            let markdown = get_markdown_content(&html);
+            get_resume(&markdown).await?;
+        }
     }
 
+    println!("Novelty link: {}", new.link);
     Ok(())
 }

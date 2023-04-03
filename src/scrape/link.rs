@@ -6,6 +6,7 @@ use terminal_spinners::{SpinnerBuilder, DOTS, DOTS2, MOON};
 use crate::{
     lang::Lang,
     page::markdown::{get_markdown_content, show_news},
+    scrape::ia::get_ia_new_resume,
     tui::select::get_answer_str,
 };
 
@@ -17,7 +18,7 @@ pub struct NewsLink {
     pub link: String,
 }
 
-pub async fn get_news_by_lang(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
+pub async fn get_news_by_lang_and_show(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
     let (news, options) = match lang {
         Lang::JavaScript => get_js_news(novelty.link.as_str()).await?,
         Lang::Rust => get_rs_news(novelty.link.as_str()).await?,
@@ -32,6 +33,31 @@ pub async fn get_news_by_lang(lang: &Lang, novelty: &Issue) -> Result<(), Box<dy
     let new_struct = news.iter().find(|new| new.title == answer);
 
     show_news(new_struct.expect("Failed to get new")).await?;
+
+    Ok(())
+}
+
+pub async fn get_news_by_lang_and_resume(
+    lang: &Lang,
+    novelty: &Issue,
+) -> Result<(), Box<dyn Error>> {
+    let (news, options) = match lang {
+        Lang::JavaScript => get_js_news(novelty.link.as_str()).await?,
+        Lang::Rust => get_rs_news(novelty.link.as_str()).await?,
+        Lang::Go => get_go_news(novelty.link.as_str()).await?,
+        Lang::Python => get_py_news(novelty.link.as_str()).await?,
+        Lang::Php => get_php_news(novelty.link.as_str()).await?,
+        Lang::Cpp => get_cpp_news(novelty.link.as_str()).await?,
+    };
+
+    let answer = get_answer_str("What new do you like to watch?", options, "No new provided");
+
+    let new_struct = news.iter().find(|new| new.title == answer);
+
+    let link = new_struct.expect("Failed to get new").link.to_string();
+    get_ia_new_resume(link.to_string()).await?;
+
+    println!("novelty link: {}", link);
 
     Ok(())
 }
