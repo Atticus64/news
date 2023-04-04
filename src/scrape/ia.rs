@@ -10,28 +10,30 @@ use crate::{
     utils::config::{get_config, get_token_cohere, has_config},
 };
 
+use reqwest::blocking::{Client, self};
+
 #[derive(Serialize, Deserialize)]
 struct IaResponse {
     id: String,
     summary: String,
 }
 
-pub async fn get_ia_new_resume(link: String) -> Result<(), Box<dyn std::error::Error>> {
-    let response = reqwest::get(link).await?;
-    let html = response.text().await?;
+pub  fn get_ia_new_resume(link: String) -> Result<(), Box<dyn std::error::Error>> {
+    let response = blocking::get(link)?;
+    let html = response.text()?;
     let markdown = get_markdown_content(&html);
-    get_resume(&markdown).await?;
+    get_resume(&markdown)?;
 
     Ok(())
 }
 
-pub async fn get_resume(text: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub  fn get_resume(text: &str) -> Result<(), Box<dyn std::error::Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&EARTH)
         .text("Ia drafting novelty")
         .start();
 
-    let client = reqwest::Client::new();
+    let client = Client::new();
     let json = json!({
       "model": "summarize-xlarge",
       "length": "long",
@@ -54,9 +56,9 @@ pub async fn get_resume(text: &str) -> Result<(), Box<dyn std::error::Error>> {
             .header("Content-Type", "application/json")
             .body(body)
             .send()
-            .await?;
+            ?;
 
-        let raw_json = resp.text().await?;
+        let raw_json = resp.text()?;
 
         let data: IaResponse = serde_json::from_str(&raw_json).unwrap();
 

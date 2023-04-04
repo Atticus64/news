@@ -4,8 +4,7 @@
 use news::get_news;
 use std::error::Error;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    get_news().await?;
+fn main() -> Result<(), Box<dyn Error>> {
+    get_news();
     Ok(())
 }

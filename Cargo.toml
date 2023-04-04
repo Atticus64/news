@@ -9,9 +9,11 @@ edition = "2021"
 colored = "2"
 clap = "4.1.8"
 crabquery = "0.1.9"
-reqwest = "0.11.14"
+#reqwest = "0.11.14"
+reqwest = { version = "0.11.14", features = ["blocking"] }
+
 terminal-spinners = "0.3.2"
-tokio = { version = "1", features = ["full"] }
+#tokio = { version = "1", features = ["full"] }
 webbrowser = "0.8.7"
 inquire = "0.5.3"
 html2text = "0.4.5"
@@ -24,7 +26,7 @@ cli-clipboard = "0.4.0"
 toml = "0.5.2"
 august = "^2.4"
 
-[target.'cfg(target_arch = "arm64")']
+[target.'cfg(target_arch = "amd64")']
 
 
 [profile.release]

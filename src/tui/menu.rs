@@ -41,7 +41,7 @@ pub fn lang_menu() -> Lang {
     Lang::from_str(language.as_str()).expect("Fail to get lang from str")
 }
 
-pub async fn novelty_menu(
+pub fn novelty_menu(
     issues: Vec<Issue>,
     options_issues: Vec<String>,
     lang: &Lang,
@@ -64,23 +64,23 @@ pub async fn novelty_menu(
     };
 
     if ia_resumable {
-        get_news_by_lang_and_resume(lang, new).await?;
+        get_news_by_lang_and_resume(lang, new)?;
     } else {
-        get_news_by_lang_and_show(lang, new).await?;
+        get_news_by_lang_and_show(lang, new)?;
     }
 
     Ok(())
 }
 
-pub async fn all_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
+pub fn all_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
     loop {
         let lang = lang_menu();
 
-        let (issues, issues_options) = get_issues(&lang).await?;
+        let (issues, issues_options) = get_issues(&lang)?;
 
         let ia_resumable = args.get_flag("resume");
 
-        novelty_menu(issues, issues_options, &lang, ia_resumable).await?;
+        novelty_menu(issues, issues_options, &lang, ia_resumable)?;
 
         let phrase = "Do you want to search more news?".to_string();
 
@@ -97,25 +97,25 @@ pub async fn all_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub async fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
+pub fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
     if args.subcommand_matches("today").is_some() {
         if args.get_flag("resume") && args.contains_id("lang") {
             let lang_str = args.get_one::<String>("lang").expect("No string for lang");
             let lang = Lang::from_str(lang_str).unwrap();
 
-            check_ultimate_news(Some(lang), true).await?;
+            check_ultimate_news(Some(lang), true)?;
             exit(0);
         } else if args.get_flag("resume") {
-            check_ultimate_news(None, true).await?;
+            check_ultimate_news(None, true)?;
             exit(0);
         }
 
-        check_ultimate_news(None, false).await?;
+        check_ultimate_news(None, false)?;
         exit(0);
     }
 
     if args.get_flag("resume") {
-        check_ultimate_news(None, true).await?;
+        check_ultimate_news(None, true)?;
         exit(0);
     }
 
@@ -135,9 +135,9 @@ pub async fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
         };
 
         loop {
-            let issue = get_latest_issue(&lang).await?;
+            let issue = get_latest_issue(&lang)?;
 
-            get_news_by_lang_and_show(&lang, &issue).await?;
+            get_news_by_lang_and_show(&lang, &issue)?;
 
             let phrase = "Do you want to search more news?".to_string();
 
@@ -171,21 +171,18 @@ pub async fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub async fn check_ultimate_news(
-    language: Option<Lang>,
-    ai_resume: bool,
-) -> Result<(), Box<dyn Error>> {
+pub fn check_ultimate_news(language: Option<Lang>, ai_resume: bool) -> Result<(), Box<dyn Error>> {
     if language.is_none() {
         loop {
             let lang = lang_menu();
 
-            let issue = get_latest_issue(&lang).await?;
+            let issue = get_latest_issue(&lang)?;
 
             if ai_resume {
                 println!("show");
-                get_news_by_lang_and_resume(&lang, &issue).await?;
+                get_news_by_lang_and_resume(&lang, &issue)?;
             } else {
-                get_news_by_lang_and_show(&lang, &issue).await?;
+                get_news_by_lang_and_show(&lang, &issue)?;
             }
 
             let phrase = "Do you want to search more news?".to_string();
@@ -202,12 +199,12 @@ pub async fn check_ultimate_news(
     } else {
         loop {
             let lang = language.as_ref().expect("Failed to as ref lang");
-            let issue = get_latest_issue(lang).await?;
+            let issue = get_latest_issue(lang)?;
 
             if ai_resume {
-                get_news_by_lang_and_resume(lang, &issue).await?;
+                get_news_by_lang_and_resume(lang, &issue)?;
             } else {
-                get_news_by_lang_and_show(lang, &issue).await?;
+                get_news_by_lang_and_show(lang, &issue)?;
             }
 
             let phrase = "Do you want to search more news?".to_string();
