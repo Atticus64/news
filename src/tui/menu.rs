@@ -182,7 +182,6 @@ pub async fn check_ultimate_news(
             let issue = get_latest_issue(&lang).await?;
 
             if ai_resume {
-                println!("show");
                 get_news_by_lang_and_resume(&lang, &issue).await?;
             } else {
                 get_news_by_lang_and_show(&lang, &issue).await?;
