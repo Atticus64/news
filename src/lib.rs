@@ -10,16 +10,16 @@ pub mod scrape;
 mod tui;
 mod utils;
 
-pub async fn get_news() -> Result<(), Box<dyn Error>> {
+pub  fn get_news() -> Result<(), Box<dyn Error>> {
     let args = get_args();
 
     let show_all = args.get_flag("all");
-    get_config();
+    //get_config();
 
     if show_all {
-        all_news(args).await?;
+        all_news(args)?;
     } else {
-        manage_news(args).await?;
+        manage_news(args)?;
     }
 
     Ok(())

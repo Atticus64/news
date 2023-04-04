@@ -5,16 +5,18 @@ use terminal_spinners::{SpinnerBuilder, EARTH, MOON};
 
 use super::Issue;
 
-pub async fn get_go_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+use reqwest::blocking;
+
+pub  fn get_go_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&EARTH)
         .text("Fetching Go Issues")
         .start();
     const GO_WEEKLY_URL: &str = "https://golangweekly.com/issues";
 
-    let response = reqwest::get(GO_WEEKLY_URL).await?;
+    let response = blocking::get(GO_WEEKLY_URL)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
@@ -45,7 +47,7 @@ pub async fn get_go_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_latest_go_issue() -> Result<Issue, Box<dyn Error>> {
+pub  fn get_latest_go_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Go Last Issue")
@@ -53,9 +55,9 @@ pub async fn get_latest_go_issue() -> Result<Issue, Box<dyn Error>> {
 
     const GO_WEEKLY_URL: &str = "https://golangweekly.com/issues";
 
-    let response = reqwest::get(GO_WEEKLY_URL).await?;
+    let response = blocking::get(GO_WEEKLY_URL)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 

@@ -12,42 +12,44 @@ use crate::{
 
 use super::issues::Issue;
 
+use reqwest::blocking;
+
 #[derive(Debug)]
 pub struct NewsLink {
     pub title: String,
     pub link: String,
 }
 
-pub async fn get_news_by_lang_and_show(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
+pub fn get_news_by_lang_and_show(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
     let (news, options) = match lang {
-        Lang::JavaScript => get_js_news(novelty.link.as_str()).await?,
-        Lang::Rust => get_rs_news(novelty.link.as_str()).await?,
-        Lang::Go => get_go_news(novelty.link.as_str()).await?,
-        Lang::Python => get_py_news(novelty.link.as_str()).await?,
-        Lang::Php => get_php_news(novelty.link.as_str()).await?,
-        Lang::Cpp => get_cpp_news(novelty.link.as_str()).await?,
+        Lang::JavaScript => get_js_news(novelty.link.as_str())?,
+        Lang::Rust => get_rs_news(novelty.link.as_str())?,
+        Lang::Go => get_go_news(novelty.link.as_str())?,
+        Lang::Python => get_py_news(novelty.link.as_str())?,
+        Lang::Php => get_php_news(novelty.link.as_str())?,
+        Lang::Cpp => get_cpp_news(novelty.link.as_str())?,
     };
 
     let answer = get_answer_str("What new do you like to watch?", options, "No new provided");
 
     let new_struct = news.iter().find(|new| new.title == answer);
 
-    show_news(new_struct.expect("Failed to get new")).await?;
+    show_news(new_struct.expect("Failed to get new"));
 
     Ok(())
 }
 
-pub async fn get_news_by_lang_and_resume(
+pub  fn get_news_by_lang_and_resume(
     lang: &Lang,
     novelty: &Issue,
 ) -> Result<(), Box<dyn Error>> {
     let (news, options) = match lang {
-        Lang::JavaScript => get_js_news(novelty.link.as_str()).await?,
-        Lang::Rust => get_rs_news(novelty.link.as_str()).await?,
-        Lang::Go => get_go_news(novelty.link.as_str()).await?,
-        Lang::Python => get_py_news(novelty.link.as_str()).await?,
-        Lang::Php => get_php_news(novelty.link.as_str()).await?,
-        Lang::Cpp => get_cpp_news(novelty.link.as_str()).await?,
+        Lang::JavaScript => get_js_news(novelty.link.as_str())?,
+        Lang::Rust => get_rs_news(novelty.link.as_str())?,
+        Lang::Go => get_go_news(novelty.link.as_str())?,
+        Lang::Python => get_py_news(novelty.link.as_str())?,
+        Lang::Php => get_php_news(novelty.link.as_str())?,
+        Lang::Cpp => get_cpp_news(novelty.link.as_str())?,
     };
 
     let answer = get_answer_str("What new do you like to watch?", options, "No new provided");
@@ -55,7 +57,7 @@ pub async fn get_news_by_lang_and_resume(
     let new_struct = news.iter().find(|new| new.title == answer);
 
     let link = new_struct.expect("Failed to get new").link.to_string();
-    get_ia_new_resume(link.to_string()).await?;
+    get_ia_new_resume(link.to_string());
 
     println!("novelty link: {}", link);
 
@@ -64,15 +66,15 @@ pub async fn get_news_by_lang_and_resume(
 
 /// Search for javascript news of a specific issue
 /// And return two arrays one of the news object and other of options of news to search
-pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub  fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching JavaScript news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let response = blocking::get(url)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
@@ -115,14 +117,14 @@ pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
 
 /// Search for rust news of a specific issue
 /// And return two arrays one of the news object and other of options of news to search
-pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub  fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&DOTS)
         .text(" Fetching Rust news")
         .start();
-    let response = reqwest::get(url).await?;
+    let response = blocking::get(url)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let document = Html::parse_document(&text);
 
@@ -170,15 +172,15 @@ pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_go_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub  fn get_go_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&DOTS2)
         .text(" Fetching Go news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let response = blocking::get(url)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
@@ -219,14 +221,14 @@ pub async fn get_go_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub  fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&DOTS)
         .text(" Fetching Python news")
         .start();
-    let response = reqwest::get(url).await?;
+    let response = blocking::get(url)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let document = Html::parse_document(&text);
     let selector = Selector::parse("span").expect("Failed to get");
@@ -271,15 +273,15 @@ pub async fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_php_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub  fn get_php_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Php news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let response = blocking::get(url)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
@@ -302,15 +304,15 @@ pub async fn get_php_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box
     Ok((vec_news, news_options))
 }
 
-pub async fn get_cpp_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub  fn get_cpp_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Cpp news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let response = blocking::get(url)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 

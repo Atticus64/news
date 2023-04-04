@@ -9,6 +9,8 @@ use std::str::FromStr;
 
 use super::view::View;
 
+use reqwest::blocking;
+
 pub fn get_markdown_content(html: &str) -> String {
     // let bytes = html.as_bytes();
     // from_read(bytes, 80)
@@ -16,9 +18,9 @@ pub fn get_markdown_content(html: &str) -> String {
 }
 
 /// render news in the terminal std output
-pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
+pub  fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
     let link = &new.link;
-    let response = reqwest::get(link).await?;
+    let response = blocking::get(link)?;
     let url = response.url();
 
     // if is a video of youtube
@@ -46,7 +48,7 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
     let view = View::from_str(view_select).expect("failed to parse view");
     match view {
         View::Terminal => {
-            let html = response.text().await?;
+            let html = response.text()?;
             let markdown = get_markdown_content(&html);
 
             if markdown.is_empty() {
@@ -61,9 +63,9 @@ pub async fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>>
             webbrowser::open(new.link.as_str())?;
         }
         View::Ia => {
-            let html = response.text().await?;
+            let html = response.text()?;
             let markdown = get_markdown_content(&html);
-            get_resume(&markdown).await?;
+            get_resume(&markdown)?;
         }
     }
 

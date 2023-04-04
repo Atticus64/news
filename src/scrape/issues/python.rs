@@ -5,16 +5,18 @@ use terminal_spinners::{SpinnerBuilder, FLIP, MOON};
 
 use super::Issue;
 
-pub async fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+use reqwest::blocking;
+
+pub  fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&FLIP)
         .text(" Fetching Python Issues")
         .start();
     const PYTHON_WEEKLY_URL: &str = "https://pycoders.com/issues";
 
-    let response = reqwest::get(PYTHON_WEEKLY_URL).await?;
+    let response = blocking::get(PYTHON_WEEKLY_URL)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
@@ -57,7 +59,7 @@ pub async fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_latest_py_issue() -> Result<Issue, Box<dyn Error>> {
+pub  fn get_latest_py_issue() -> Result<Issue, Box<dyn Error>> {
     const PYTHON_WEEKLY_URL: &str = "https://pycoders.com/issues";
 
     let handle = SpinnerBuilder::new()
@@ -65,9 +67,9 @@ pub async fn get_latest_py_issue() -> Result<Issue, Box<dyn Error>> {
         .text("Fetching Python Last Issue")
         .start();
 
-    let response = reqwest::get(PYTHON_WEEKLY_URL).await?;
+    let response = blocking::get(PYTHON_WEEKLY_URL)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 

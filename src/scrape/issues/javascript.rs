@@ -5,14 +5,16 @@ use terminal_spinners::{SpinnerBuilder, MOON};
 
 use super::Issue;
 
+use reqwest::blocking;
+
 /// Search for javascript weekly issues news
 /// Return a array of Issues and options of that issues to search them
-pub async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+pub  fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     const JAVASCRIPT_WEEKLY_URL: &str = "https://javascriptweekly.com/issues";
 
-    let response = reqwest::get(JAVASCRIPT_WEEKLY_URL).await?;
+    let response = blocking::get(JAVASCRIPT_WEEKLY_URL)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
@@ -42,7 +44,7 @@ pub async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
+pub  fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
     const JAVASCRIPT_WEEKLY_URL: &str = "https://javascriptweekly.com/issues";
 
     let handle = SpinnerBuilder::new()
@@ -50,9 +52,9 @@ pub async fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
         .text("Fetching JavaScript Last Issue")
         .start();
 
-    let response = reqwest::get(JAVASCRIPT_WEEKLY_URL).await?;
+    let response = blocking::get(JAVASCRIPT_WEEKLY_URL)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 

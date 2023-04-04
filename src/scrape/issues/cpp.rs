@@ -5,16 +5,18 @@ use terminal_spinners::{SpinnerBuilder, FLIP, MOON};
 
 use super::Issue;
 
-pub async fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+use reqwest::blocking;
+
+pub  fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&FLIP)
         .text(" Fetching Cpp Issues")
         .start();
     const CPP_WEEKLY: &str = "https://cpp.libhunt.com/newsletter/archive";
 
-    let response = reqwest::get(CPP_WEEKLY).await?;
+    let response = blocking::get(CPP_WEEKLY)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
@@ -65,7 +67,7 @@ pub async fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn 
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
+pub  fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
     const PHP_WEEKLY: &str = "https://cpp.libhunt.com/newsletter/archive";
 
     let handle = SpinnerBuilder::new()
@@ -73,9 +75,9 @@ pub async fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
         .text("Fetching Cpp Last Issue")
         .start();
 
-    let response = reqwest::get(PHP_WEEKLY).await?;
+    let response = blocking::get(PHP_WEEKLY)?;
 
-    let text = response.text().await?;
+    let text = response.text()?;
 
     let doc = Document::from(text);
 
