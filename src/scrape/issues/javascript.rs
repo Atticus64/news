@@ -3,16 +3,16 @@ use std::error::Error;
 use crabquery::Document;
 use terminal_spinners::{SpinnerBuilder, MOON};
 
+use crate::scrape::link::get_html;
+
 use super::Issue;
+
+const JAVASCRIPT_WEEKLY_URL: &str = "https://javascriptweekly.com/issues";
 
 /// Search for javascript weekly issues news
 /// Return a array of Issues and options of that issues to search them
-pub async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
-    const JAVASCRIPT_WEEKLY_URL: &str = "https://javascriptweekly.com/issues";
-
-    let response = reqwest::get(JAVASCRIPT_WEEKLY_URL).await?;
-
-    let text = response.text().await?;
+pub fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+    let text = get_html(JAVASCRIPT_WEEKLY_URL);
 
     let doc = Document::from(text);
 
@@ -42,17 +42,13 @@ pub async fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
-    const JAVASCRIPT_WEEKLY_URL: &str = "https://javascriptweekly.com/issues";
-
+pub fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching JavaScript Last Issue")
         .start();
 
-    let response = reqwest::get(JAVASCRIPT_WEEKLY_URL).await?;
-
-    let text = response.text().await?;
+    let text = get_html(JAVASCRIPT_WEEKLY_URL);
 
     let doc = Document::from(text);
 

@@ -3,18 +3,19 @@ use std::error::Error;
 use crabquery::Document;
 use terminal_spinners::{SpinnerBuilder, CLOCK, MOON};
 
+use crate::scrape::link::get_html;
+
 use super::Issue;
 
-pub async fn get_php_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+const PHP_WEEKLY: &str = "https://php.libhunt.com/newsletter/archive";
+
+pub fn get_php_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&CLOCK)
         .text("Fetching PHP Issues")
         .start();
-    const PHP_WEEKLY: &str = "https://php.libhunt.com/newsletter/archive";
 
-    let response = reqwest::get(PHP_WEEKLY).await?;
-
-    let text = response.text().await?;
+    let text = get_html(PHP_WEEKLY);
 
     let doc = Document::from(text);
 
@@ -66,17 +67,13 @@ pub async fn get_php_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn 
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_latest_php_issue() -> Result<Issue, Box<dyn Error>> {
-    const PHP_WEEKLY: &str = "https://php.libhunt.com/newsletter/archive";
-
+pub fn get_latest_php_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Php Last Issue")
         .start();
 
-    let response = reqwest::get(PHP_WEEKLY).await?;
-
-    let text = response.text().await?;
+    let text = get_html(PHP_WEEKLY);
 
     let doc = Document::from(text);
 

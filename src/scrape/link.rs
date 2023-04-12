@@ -1,4 +1,3 @@
-use crabquery::Document;
 use scraper::{Html, Selector};
 use std::error::Error;
 use terminal_spinners::{SpinnerBuilder, DOTS, DOTS2, MOON};
@@ -18,36 +17,33 @@ pub struct NewsLink {
     pub link: String,
 }
 
-pub async fn get_news_by_lang_and_show(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
+pub fn get_news_by_lang_and_show(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
     let (news, options) = match lang {
-        Lang::JavaScript => get_js_news(novelty.link.as_str()).await?,
-        Lang::Rust => get_rs_news(novelty.link.as_str()).await?,
-        Lang::Go => get_go_news(novelty.link.as_str()).await?,
-        Lang::Python => get_py_news(novelty.link.as_str()).await?,
-        Lang::Php => get_php_news(novelty.link.as_str()).await?,
-        Lang::Cpp => get_cpp_news(novelty.link.as_str()).await?,
+        Lang::JavaScript => get_js_news(novelty.link.as_str())?,
+        Lang::Rust => get_rs_news(novelty.link.as_str())?,
+        Lang::Go => get_go_news(novelty.link.as_str())?,
+        Lang::Python => get_py_news(novelty.link.as_str())?,
+        Lang::Php => get_php_news(novelty.link.as_str())?,
+        Lang::Cpp => get_cpp_news(novelty.link.as_str())?,
     };
 
     let answer = get_answer_str("What new do you like to watch?", options, "No new provided");
 
     let new_struct = news.iter().find(|new| new.title == answer);
 
-    show_news(new_struct.expect("Failed to get new")).await?;
+    show_news(new_struct.expect("Failed to get new"))?;
 
     Ok(())
 }
 
-pub async fn get_news_by_lang_and_resume(
-    lang: &Lang,
-    novelty: &Issue,
-) -> Result<(), Box<dyn Error>> {
+pub fn get_news_by_lang_and_resume(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
     let (news, options) = match lang {
-        Lang::JavaScript => get_js_news(novelty.link.as_str()).await?,
-        Lang::Rust => get_rs_news(novelty.link.as_str()).await?,
-        Lang::Go => get_go_news(novelty.link.as_str()).await?,
-        Lang::Python => get_py_news(novelty.link.as_str()).await?,
-        Lang::Php => get_php_news(novelty.link.as_str()).await?,
-        Lang::Cpp => get_cpp_news(novelty.link.as_str()).await?,
+        Lang::JavaScript => get_js_news(novelty.link.as_str())?,
+        Lang::Rust => get_rs_news(novelty.link.as_str())?,
+        Lang::Go => get_go_news(novelty.link.as_str())?,
+        Lang::Python => get_py_news(novelty.link.as_str())?,
+        Lang::Php => get_php_news(novelty.link.as_str())?,
+        Lang::Cpp => get_cpp_news(novelty.link.as_str())?,
     };
 
     let answer = get_answer_str("What new do you like to watch?", options, "No new provided");
@@ -55,55 +51,59 @@ pub async fn get_news_by_lang_and_resume(
     let new_struct = news.iter().find(|new| new.title == answer);
 
     let link = new_struct.expect("Failed to get new").link.to_string();
-    get_ia_new_resume(link.to_string()).await?;
+    get_ia_new_resume(link.to_string())?;
 
     println!("novelty link: {}", link);
 
     Ok(())
 }
 
+pub fn get_html(url: &str) -> String {
+    let response = ureq::get(url).call().expect("Failed to get response");
+
+    response
+        .into_string()
+        .expect("Failed to convert to string html response")
+}
+
 /// Search for javascript news of a specific issue
 /// And return two arrays one of the news object and other of options of news to search
-pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching JavaScript news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let text = get_html(url);
 
-    let text = response.text().await?;
+    // let doc = Document::from(text);
 
-    let doc = Document::from(text);
+    let document = Html::parse_document(&text);
 
-    let elements_li = doc.select(".mainlink");
+    let selector = Selector::parse(".mainlink").expect("Failed to select posts");
+
     let mut vec_news: Vec<NewsLink> = vec![];
-    for elem in elements_li {
-        let uri = elem
-            .select("a")
-            .first()
-            .expect("fail to get first element of uri")
-            .attr("href")
-            .expect("fail to get attr href");
+    // for elem in elements_li {
+    for elem in document.select(&selector) {
+        let ancor = Selector::parse("a").expect("Failed to get");
 
-        let mut title = elem
-            .children()
-            .first()
-            .expect("fail to get first element")
-            .text()
-            .expect("fail to conver a text");
+        let ancors = elem.select(&ancor);
 
-        if title.len() < 6 {
-            title = elem
-                .children()
-                .get(1)
-                .expect("fail to get first element children title")
-                .text()
-                .expect("fail to convert a text title children");
+        for a in ancors {
+            let text = get_markdown_content(a.inner_html().as_str());
+
+            let node = a.value();
+
+            let href = node.attr("href").expect("Failed to get href rs news");
+
+            if !text.is_empty() {
+                let new = NewsLink {
+                    title: text.trim().to_string(),
+                    link: href.to_string(),
+                };
+                vec_news.push(new)
+            }
         }
-
-        let new = NewsLink { title, link: uri };
-        vec_news.push(new)
     }
 
     let news_options = vec_news.iter().map(|new| new.title.clone()).collect();
@@ -115,14 +115,13 @@ pub async fn get_js_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
 
 /// Search for rust news of a specific issue
 /// And return two arrays one of the news object and other of options of news to search
-pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&DOTS)
         .text(" Fetching Rust news")
         .start();
-    let response = reqwest::get(url).await?;
 
-    let text = response.text().await?;
+    let text = get_html(url);
 
     let document = Html::parse_document(&text);
 
@@ -170,63 +169,56 @@ pub async fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_go_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub fn get_go_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&DOTS2)
         .text(" Fetching Go news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let text = get_html(url);
 
-    let text = response.text().await?;
+    let document = Html::parse_document(&text);
 
-    let doc = Document::from(text);
+    let selector = Selector::parse(".mainlink").expect("Failed to select posts");
 
-    let elements_li = doc.select(".mainlink");
-    let mut vec_issues: Vec<NewsLink> = vec![];
-    for elem in elements_li {
-        let uri = elem
-            .select("a")
-            .first()
-            .expect("fail to get first element of uri")
-            .attr("href")
-            .expect("fail to get attr href");
+    let mut vec_news: Vec<NewsLink> = vec![];
+    // for elem in elements_li {
+    for elem in document.select(&selector) {
+        let ancor = Selector::parse("a").expect("Failed to get");
 
-        let mut title = elem
-            .children()
-            .first()
-            .expect("fail to get first element")
-            .text()
-            .expect("fail to conver a text");
+        let ancors = elem.select(&ancor);
 
-        if title.len() < 6 {
-            title = elem
-                .children()
-                .get(1)
-                .expect("fail to get first element children title")
-                .text()
-                .expect("fail to convert a text title children");
+        for a in ancors {
+            let text = get_markdown_content(a.inner_html().as_str());
+
+            let node = a.value();
+
+            let href = node.attr("href").expect("Failed to get href rs news");
+
+            if !text.is_empty() {
+                let new = NewsLink {
+                    title: text.trim().to_string(),
+                    link: href.to_string(),
+                };
+                vec_news.push(new)
+            }
         }
-
-        let new = NewsLink { title, link: uri };
-        vec_issues.push(new)
     }
 
-    let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();
+    let issues_options = vec_news.iter().map(|new| new.title.clone()).collect();
 
     handle.done();
 
-    Ok((vec_issues, issues_options))
+    Ok((vec_news, issues_options))
 }
 
-pub async fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&DOTS)
         .text(" Fetching Python news")
         .start();
-    let response = reqwest::get(url).await?;
 
-    let text = response.text().await?;
+    let text = get_html(url);
 
     let document = Html::parse_document(&text);
     let selector = Selector::parse("span").expect("Failed to get");
@@ -271,28 +263,40 @@ pub async fn get_py_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_php_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub fn get_php_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Php news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let text = get_html(url);
 
-    let text = response.text().await?;
+    let document = Html::parse_document(&text);
 
-    let doc = Document::from(text);
+    let selector = Selector::parse(".newsletter-stories").expect("Failed to select posts");
 
-    let stories = doc.select(".newsletter-stories");
-    let elements_a = stories.first().unwrap().select(".title");
     let mut vec_news: Vec<NewsLink> = vec![];
-    for elem in elements_a {
-        let uri = elem.attr("href").expect("fail to get attr href");
+    // for elem in elements_li {
+    for elem in document.select(&selector) {
+        let ancor = Selector::parse(".title").expect("Failed to get");
 
-        let title = elem.text().expect("fail to conver a text");
+        let ancors = elem.select(&ancor);
 
-        let new = NewsLink { title, link: uri };
-        vec_news.push(new)
+        for a in ancors {
+            let text = get_markdown_content(a.inner_html().as_str());
+
+            let node = a.value();
+
+            let href = node.attr("href").expect("Failed to get href rs news");
+
+            if !text.is_empty() {
+                let new = NewsLink {
+                    title: text.trim().to_string(),
+                    link: href.to_string(),
+                };
+                vec_news.push(new)
+            }
+        }
     }
 
     let news_options = vec_news.iter().map(|new| new.title.clone()).collect();
@@ -302,28 +306,40 @@ pub async fn get_php_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box
     Ok((vec_news, news_options))
 }
 
-pub async fn get_cpp_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
+pub fn get_cpp_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Cpp news")
         .start();
 
-    let response = reqwest::get(url).await?;
+    let text = get_html(url);
 
-    let text = response.text().await?;
+    let document = Html::parse_document(&text);
 
-    let doc = Document::from(text);
+    let selector = Selector::parse(".newsletter-stories").expect("Failed to select posts");
 
-    let stories = doc.select(".newsletter-stories");
-    let elements_a = stories.first().unwrap().select(".title");
     let mut vec_news: Vec<NewsLink> = vec![];
-    for elem in elements_a {
-        let uri = elem.attr("href").expect("fail to get attr href");
+    // for elem in elements_li {
+    for elem in document.select(&selector) {
+        let ancor = Selector::parse(".title").expect("Failed to get");
 
-        let title = elem.text().expect("fail to conver a text");
+        let ancors = elem.select(&ancor);
 
-        let new = NewsLink { title, link: uri };
-        vec_news.push(new)
+        for a in ancors {
+            let text = get_markdown_content(a.inner_html().as_str());
+
+            let node = a.value();
+
+            let href = node.attr("href").expect("Failed to get href rs news");
+
+            if !text.is_empty() {
+                let new = NewsLink {
+                    title: text.trim().to_string(),
+                    link: href.to_string(),
+                };
+                vec_news.push(new)
+            }
+        }
     }
 
     let news_options = vec_news.iter().map(|new| new.title.clone()).collect();

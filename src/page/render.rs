@@ -12,21 +12,15 @@ use termimad::crossterm::terminal::{Clear, EnterAlternateScreen, LeaveAlternateS
 use termimad::crossterm::{queue, terminal};
 use termimad::MadView;
 
-use crate::utils::clipboard::copy_to_clipboard;
-
 use super::skin::make_skin;
 use super::view::view_area;
 
-fn render_markdown(
-    mut view: MadView,
-    mut w: Stdout,
-    link: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn render_markdown(mut view: MadView, mut w: Stdout) -> Result<(), Box<dyn std::error::Error>> {
     loop {
         view.write_on(&mut w)?;
         w.flush()?;
 
-        let kill_render = listen_keymaps(&mut view, &mut w, link);
+        let kill_render = listen_keymaps(&mut view, &mut w);
         if kill_render {
             break;
         }
@@ -38,7 +32,7 @@ fn render_markdown(
     Ok(())
 }
 
-fn listen_keymaps(view: &mut MadView, w: &mut Stdout, link: &str) -> bool {
+fn listen_keymaps(view: &mut MadView, w: &mut Stdout) -> bool {
     let mut kill_render = false;
     match event::read() {
         Ok(Event::Key(KeyEvent { code, .. })) => match code {
@@ -53,8 +47,6 @@ fn listen_keymaps(view: &mut MadView, w: &mut Stdout, link: &str) -> bool {
             Char('q') => kill_render = true,
             Char('Q') => kill_render = true,
             Esc => kill_render = true,
-            Char('y') => copy_to_clipboard(link),
-            Char('Y') => copy_to_clipboard(link),
             _ => {}
         },
         Ok(Event::Resize(..)) => {
@@ -67,7 +59,7 @@ fn listen_keymaps(view: &mut MadView, w: &mut Stdout, link: &str) -> bool {
     kill_render
 }
 
-pub fn generate_view(markdown: &str, link: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn generate_view(markdown: &str) -> Result<(), Box<dyn std::error::Error>> {
     let skin = make_skin();
 
     let mut w = stdout(); // we could also have used stderr
@@ -75,14 +67,13 @@ pub fn generate_view(markdown: &str, link: &str) -> Result<(), Box<dyn std::erro
     terminal::enable_raw_mode()?;
     queue!(w, Hide)?; // hiding the cursor
     let notification = format!(
-        "{}: k up, j down, K pageup, J pagedown {}: Esc and q, {}: y or Y",
+        "{}: k up, j down, K pageup, J pagedown {}: Esc and q",
         "Navigation".green(),
         "Exit".red(),
-        "Copy url to clipboard".yellow()
     );
     let md = format!("{notification} \n {markdown}");
     //  let skin = termimad::get_default_skin();
     let view = MadView::from(md, view_area(), skin);
-    render_markdown(view, w, link)?;
+    render_markdown(view, w)?;
     Ok(())
 }

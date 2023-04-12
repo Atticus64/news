@@ -3,18 +3,19 @@ use std::error::Error;
 use crabquery::Document;
 use terminal_spinners::{SpinnerBuilder, EARTH, MOON};
 
+use crate::scrape::link::get_html;
+
 use super::Issue;
 
-pub async fn get_go_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+const GO_WEEKLY_URL: &str = "https://golangweekly.com/issues";
+
+pub fn get_go_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&EARTH)
         .text("Fetching Go Issues")
         .start();
-    const GO_WEEKLY_URL: &str = "https://golangweekly.com/issues";
 
-    let response = reqwest::get(GO_WEEKLY_URL).await?;
-
-    let text = response.text().await?;
+    let text = get_html(GO_WEEKLY_URL);
 
     let doc = Document::from(text);
 
@@ -45,17 +46,13 @@ pub async fn get_go_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn E
     Ok((vec_issues, issues_options))
 }
 
-pub async fn get_latest_go_issue() -> Result<Issue, Box<dyn Error>> {
+pub fn get_latest_go_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Go Last Issue")
         .start();
 
-    const GO_WEEKLY_URL: &str = "https://golangweekly.com/issues";
-
-    let response = reqwest::get(GO_WEEKLY_URL).await?;
-
-    let text = response.text().await?;
+    let text = get_html(GO_WEEKLY_URL);
 
     let doc = Document::from(text);
 
