@@ -2,20 +2,19 @@ use crabquery::Document;
 use std::error::Error;
 use terminal_spinners::{SpinnerBuilder, FLIP, MOON};
 
+use crate::scrape::link::get_html;
+
 use super::Issue;
 
-use reqwest::blocking;
+const RUST_WEEKLY_URL: &str = "https://this-week-in-rust.org/blog/archives/index.html";
 
-pub  fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+pub fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&FLIP)
         .text(" Fetching Rust Issues")
         .start();
-    const RUST_WEEKLY_URL: &str = "https://this-week-in-rust.org/blog/archives/index.html";
 
-    let response = blocking::get(RUST_WEEKLY_URL)?;
-
-    let text = response.text()?;
+    let text = get_html(RUST_WEEKLY_URL);
 
     let doc = Document::from(text);
 
@@ -62,17 +61,13 @@ pub  fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>
     Ok((vec_issues, issues_options))
 }
 
-pub  fn get_latest_rs_issue() -> Result<Issue, Box<dyn Error>> {
-    const RUST_WEEKLY_URL: &str = "https://this-week-in-rust.org/blog/archives/index.html";
-
+pub fn get_latest_rs_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Rust Last Issue")
         .start();
 
-    let response = blocking::get(RUST_WEEKLY_URL)?;
-
-    let text = response.text()?;
+    let text = get_html(RUST_WEEKLY_URL);
 
     let doc = Document::from(text);
 

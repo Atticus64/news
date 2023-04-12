@@ -1,62 +1,33 @@
-use serde_derive::{Deserialize, Serialize};
-use std::{fs, process::exit};
-use termimad::crossterm::style::Stylize;
-use toml;
+use dirs;
+use json;
+use std::fs;
 
-const CONFIG_PATH: &str = "/.config/news.toml";
-
-#[derive(Serialize, Deserialize, Debug)]
-struct TokenConfig {
-    cohere_token: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-
-struct ConfigLangs {
-    langs: Vec<String>,
-}
+const CONFIG_PATH: &str = ".config/news.json";
 
 // pub fn get_langs_config(content: String) -> Vec<String> {
-pub fn get_langs_config(content: String) -> Vec<String> {
-    let config: ConfigLangs = match toml::from_str(&content) {
-        // If successful, return data as `Data` struct.
-        // `d` is a local variable.
-        Ok(d) => d,
-        // Handle the `error` case.
-        Err(_) => ConfigLangs { langs: Vec::new() },
-    };
+pub fn get_token_cohere(content: String) -> String {
+    let json = json::parse(content.as_str()).unwrap();
+    let token = &json["cohere_token"].to_string();
 
-    config.langs
+    token.to_string()
 }
 
-pub fn get_token_cohere(content: String) -> String {
-    let config: TokenConfig = match toml::from_str(&content) {
-        // If successful, return data as `Data` struct.
-        // `d` is a local variable.
-        Ok(d) => d,
-        // Handle the `error` case.
-        Err(_) => {
-            println!("\n{}: Failed to get config cohere_token", "Error".red());
-            println!(
-                "Configure your Cohere token in config file {}",
-                "$HOME/.config/news.toml".yellow()
-            );
-            exit(1)
-        }
-    };
-
-    config.cohere_token
+fn get_home() -> String {
+    let buf = dirs::home_dir().expect("Failed to get home path");
+    buf.to_str()
+        .expect("Failed to converto to string")
+        .to_string()
 }
 
 pub fn has_config() -> bool {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home();
     let path = format!("{home}/{}", CONFIG_PATH);
 
     std::path::Path::new(&path).exists()
 }
 
 pub fn get_config() -> String {
-    let home = std::env::var("HOME").unwrap();
+    let home = get_home();
     let path = format!("{home}/{}", CONFIG_PATH);
     let data = fs::read_to_string(path);
 

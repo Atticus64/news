@@ -3,20 +3,19 @@ use std::error::Error;
 use crabquery::Document;
 use terminal_spinners::{SpinnerBuilder, FLIP, MOON};
 
+use crate::scrape::link::get_html;
+
 use super::Issue;
 
-use reqwest::blocking;
+const CPP_WEEKLY: &str = "https://cpp.libhunt.com/newsletter/archive";
 
-pub  fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+pub fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&FLIP)
         .text(" Fetching Cpp Issues")
         .start();
-    const CPP_WEEKLY: &str = "https://cpp.libhunt.com/newsletter/archive";
 
-    let response = blocking::get(CPP_WEEKLY)?;
-
-    let text = response.text()?;
+    let text = get_html(CPP_WEEKLY);
 
     let doc = Document::from(text);
 
@@ -67,17 +66,13 @@ pub  fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error
     Ok((vec_issues, issues_options))
 }
 
-pub  fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
-    const PHP_WEEKLY: &str = "https://cpp.libhunt.com/newsletter/archive";
-
+pub fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Cpp Last Issue")
         .start();
 
-    let response = blocking::get(PHP_WEEKLY)?;
-
-    let text = response.text()?;
+    let text = get_html(CPP_WEEKLY);
 
     let doc = Document::from(text);
 

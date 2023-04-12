@@ -3,20 +3,19 @@ use std::error::Error;
 use crabquery::Document;
 use terminal_spinners::{SpinnerBuilder, FLIP, MOON};
 
+use crate::scrape::link::get_html;
+
 use super::Issue;
 
-use reqwest::blocking;
+const PYTHON_WEEKLY_URL: &str = "https://pycoders.com/issues";
 
-pub  fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
+pub fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&FLIP)
         .text(" Fetching Python Issues")
         .start();
-    const PYTHON_WEEKLY_URL: &str = "https://pycoders.com/issues";
 
-    let response = blocking::get(PYTHON_WEEKLY_URL)?;
-
-    let text = response.text()?;
+    let text = get_html(PYTHON_WEEKLY_URL);
 
     let doc = Document::from(text);
 
@@ -59,17 +58,13 @@ pub  fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>
     Ok((vec_issues, issues_options))
 }
 
-pub  fn get_latest_py_issue() -> Result<Issue, Box<dyn Error>> {
-    const PYTHON_WEEKLY_URL: &str = "https://pycoders.com/issues";
-
+pub fn get_latest_py_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
         .text("Fetching Python Last Issue")
         .start();
 
-    let response = blocking::get(PYTHON_WEEKLY_URL)?;
-
-    let text = response.text()?;
+    let text = get_html(PYTHON_WEEKLY_URL);
 
     let doc = Document::from(text);
 

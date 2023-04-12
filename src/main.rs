@@ -5,6 +5,6 @@ use news::get_news;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    get_news();
+    get_news()?;
     Ok(())
 }

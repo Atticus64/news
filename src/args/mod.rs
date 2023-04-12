@@ -67,6 +67,7 @@ pub fn get_command() -> Command {
         )
 }
 
+/// Get ArgMatches of the app
 pub fn get_args() -> ArgMatches {
     let command = get_command();
 

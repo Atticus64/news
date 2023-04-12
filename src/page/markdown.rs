@@ -3,32 +3,26 @@ use crate::page::render::generate_view;
 use crate::scrape::ia::get_resume;
 use crate::scrape::link::NewsLink;
 use crate::tui::select::manage_exit;
-use august;
 use inquire::Select;
+use nanohtml2text::html2text;
 use std::str::FromStr;
 
 use super::view::View;
 
-use reqwest::blocking;
-
 pub fn get_markdown_content(html: &str) -> String {
-    // let bytes = html.as_bytes();
-    // from_read(bytes, 80)
-    august::convert(html, 79)
+    html2text(html)
 }
 
 /// render news in the terminal std output
-pub  fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
+pub fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
     let link = &new.link;
-    let response = blocking::get(link)?;
-    let url = response.url();
+
+    let response = ureq::get(link).call()?;
+
+    let url = response.get_url();
 
     // if is a video of youtube
-    if url
-        .domain()
-        .expect("error not is a domain")
-        .contains("youtube")
-    {
+    if url.contains("youtube") {
         if webbrowser::open(new.link.as_str()).is_ok() {}
         return Ok(());
     }
@@ -48,7 +42,7 @@ pub  fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
     let view = View::from_str(view_select).expect("failed to parse view");
     match view {
         View::Terminal => {
-            let html = response.text()?;
+            let html = response.into_string()?;
             let markdown = get_markdown_content(&html);
 
             if markdown.is_empty() {
@@ -56,14 +50,14 @@ pub  fn show_news(new: &NewsLink) -> Result<(), Box<dyn std::error::Error>> {
                 println!("Opening browser instead");
                 if webbrowser::open(new.link.as_str()).is_ok() {}
             } else {
-                generate_view(markdown.as_str(), link).expect("failed to generate a markdown view");
+                generate_view(markdown.as_str()).expect("failed to generate a markdown view");
             }
         }
         View::Web => {
             webbrowser::open(new.link.as_str())?;
         }
         View::Ia => {
-            let html = response.text()?;
+            let html = response.into_string()?;
             let markdown = get_markdown_content(&html);
             get_resume(&markdown)?;
         }
