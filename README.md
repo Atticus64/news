@@ -10,7 +10,7 @@ A nice, fast, confortable terminal CLI to check developer news
 * :tv: Open youtube if resource of new is a video
 * :blue_book: Markdown like way to watch news in terminal
 * :globe_with_meridians: open browser instead of terminal
-* :brain: Ia resume of a new
+* :brain: Ia summary of a new
 * :mag: Search across news list
 
 ## [:package:] Installation 
