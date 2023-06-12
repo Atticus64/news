@@ -42,6 +42,35 @@ pub fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>>
     Ok((vec_issues, issues_options))
 }
 
+pub fn get_last_js_issue() -> Result<Issue, Box<dyn Error>> {
+    let text = get_html(JAVASCRIPT_WEEKLY_URL);
+
+    let doc = Document::from(text);
+
+    let issue = doc.select(".issue");
+
+    let first = issue.first().expect("Failed to get first issue");
+
+    let url = first
+        .children()
+        .first()
+        .expect("failed to get first element url")
+        .attr("href")
+        .expect("failed to get attr href element url");
+
+    let number_issue = url.split('/').last().expect("failed to get last url");
+    let url_completed = format!("{JAVASCRIPT_WEEKLY_URL}/{number_issue}");
+    let name = first.text().expect("failed to tranform to text name issue");
+
+    let new = Issue {
+        title: name,
+        link: url_completed,
+    };
+
+
+    Ok(new)
+}
+
 pub fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)
@@ -66,12 +95,14 @@ pub fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
     let number_issue = url.split('/').last().expect("failed to get last url");
     let url_completed = format!("{JAVASCRIPT_WEEKLY_URL}/{number_issue}");
     let name = first.text().expect("failed to tranform to text name issue");
+
     let new = Issue {
         title: name,
         link: url_completed,
     };
 
     handle.done();
+
 
     Ok(new)
 }

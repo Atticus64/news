@@ -31,13 +31,11 @@ pub fn get_config() -> String {
     let path = format!("{home}/{}", CONFIG_PATH);
     let data = fs::read_to_string(path);
 
-    let content = match data {
+    match data {
         Ok(c) => c,
         Err(err) => {
             eprintln!("Failed to read config file: {}", err);
             std::process::exit(1);
         }
-    };
-
-    content
+    }
 }

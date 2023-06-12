@@ -17,6 +17,19 @@ pub struct NewsLink {
     pub link: String,
 }
 
+pub fn get_lang_news(lang: &Lang, novelty: &Issue) -> Result<Vec<NewsLink>, Box<dyn Error>> {
+    let (news, _) = match lang {
+        Lang::JavaScript => get_js_news(novelty.link.as_str())?,
+        Lang::Rust => get_rs_news(novelty.link.as_str())?,
+        Lang::Go => get_go_news(novelty.link.as_str())?,
+        Lang::Python => get_py_news(novelty.link.as_str())?,
+        Lang::Php => get_php_news(novelty.link.as_str())?,
+        Lang::Cpp => get_cpp_news(novelty.link.as_str())?,
+    };
+
+    Ok(news)
+}
+
 pub fn get_news_by_lang_and_show(lang: &Lang, novelty: &Issue) -> Result<(), Box<dyn Error>> {
     let (news, options) = match lang {
         Lang::JavaScript => get_js_news(novelty.link.as_str())?,

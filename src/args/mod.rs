@@ -25,11 +25,11 @@ pub fn get_command() -> Command {
                 .help("Show news version"),
         )
         .arg(
-            Arg::new("list")
-                .long("list")
-                .num_args(0)
+            Arg::new("support")
+                .long("sup")
                 .required(false)
-                .help("List programming languages available for news"),
+                .num_args(0)
+                .help("Show lang supported"),
         )
         .arg(
             Arg::new("all")
@@ -47,6 +47,15 @@ pub fn get_command() -> Command {
                 .required(false)
                 .help("Resume the new selected by IA technology"),
         )
+        .subcommand(
+            Command::new("list")
+            .about("list latest news of a lang")
+            .arg(
+                Arg::new("language")
+                .required(true)
+                .help("Language to search news"),
+                )
+            )
         .subcommand(
             Command::new("today")
                 .about("Check the latest news")

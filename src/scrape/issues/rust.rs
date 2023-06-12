@@ -61,6 +61,51 @@ pub fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>>
     Ok((vec_issues, issues_options))
 }
 
+pub fn get_last_rs_issue() -> Result<Issue, Box<dyn Error>> {
+    let text = get_html(RUST_WEEKLY_URL);
+
+    let doc = Document::from(text);
+
+    let issues = doc.select(".post-title");
+
+    let first = issues.first().expect("Failed to get first issue");
+
+    let date_raw = first
+        .select(".time-prefix")
+        .first()
+        .expect("failed to get first element")
+        .children()
+        .first()
+        .expect("failed to get first element children date issues rs")
+        .text()
+        .expect("Failed to converto to String");
+    let title_raw = first
+        .select(".text-right")
+        .first()
+        .expect("Failed to get first element")
+        .children()
+        .first()
+        .expect("Failed to get first element children title issues rs")
+        .text()
+        .expect("Failed to convert to String");
+
+    let link = first
+        .select(".text-right")
+        .first()
+        .expect("Failed to get first element")
+        .children()
+        .first()
+        .expect("Failed to get first element")
+        .attr("href")
+        .expect("Failed to get attr element");
+
+    let title = format!("{title_raw} - {date_raw}");
+
+    let new = Issue { title, link };
+
+    Ok(new)
+}
+
 pub fn get_latest_rs_issue() -> Result<Issue, Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
         .spinner(&MOON)

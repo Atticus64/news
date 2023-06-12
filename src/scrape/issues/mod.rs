@@ -10,12 +10,12 @@ use std::error::Error;
 use crate::lang::Lang;
 
 use self::{
-    cpp::{get_cpp_issues_news, get_latest_cpp_issue},
-    go::{get_go_issues_news, get_latest_go_issue},
-    javascript::{get_js_issues_news, get_latest_js_issue},
-    php::{get_latest_php_issue, get_php_issues_news},
-    python::{get_latest_py_issue, get_py_issues_news},
-    rust::{get_latest_rs_issue, get_rs_issues_news},
+    cpp::{get_cpp_issues_news, get_latest_cpp_issue, get_last_cpp_issue},
+    go::{get_go_issues_news, get_latest_go_issue, get_last_go_issue},
+    javascript::{get_js_issues_news, get_latest_js_issue, get_last_js_issue},
+    php::{get_latest_php_issue, get_php_issues_news, get_last_php_issue},
+    python::{get_latest_py_issue, get_py_issues_news, get_last_py_issue},
+    rust::{get_latest_rs_issue, get_rs_issues_news, get_last_rs_issue},
 };
 
 #[derive(Debug, Clone)]
@@ -45,5 +45,16 @@ pub  fn get_latest_issue(lang: &Lang) -> Result<Issue, Box<dyn Error>> {
         Lang::Python => get_latest_py_issue()?,
         Lang::Php => get_latest_php_issue()?,
         Lang::Cpp => get_latest_cpp_issue()?,
+    })
+}
+
+pub fn get_last_issue(lang: &Lang) -> Result<Issue, Box<dyn Error>> {
+     Ok(match lang {
+        Lang::JavaScript => get_last_js_issue()?,
+        Lang::Rust => get_last_rs_issue()?,
+        Lang::Go => get_last_go_issue()?,
+        Lang::Python => get_last_py_issue()?,
+        Lang::Php => get_last_php_issue()?,
+        Lang::Cpp => get_last_cpp_issue()?,
     })
 }

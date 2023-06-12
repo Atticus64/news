@@ -77,3 +77,30 @@ pub fn get_latest_go_issue() -> Result<Issue, Box<dyn Error>> {
 
     Ok(new)
 }
+
+pub fn get_last_go_issue() -> Result<Issue, Box<dyn Error>> {
+    let text = get_html(GO_WEEKLY_URL);
+
+    let doc = Document::from(text);
+
+    let issues = doc.select(".issue");
+    let first = issues.first().expect("Fail to get first issue");
+
+    let url = first
+        .children()
+        .first()
+        .expect("failed to get first element url")
+        .attr("href")
+        .expect("failed to get attr href element url");
+    let number_issue = url.split('/').last().expect("failed to get last url");
+    let url_complete = format!("{GO_WEEKLY_URL}/{number_issue}");
+    let name = first.text().expect("failed to tranform to text name issue");
+    let new = Issue {
+        title: name,
+        link: url_complete,
+    };
+
+
+    Ok(new)
+}
+

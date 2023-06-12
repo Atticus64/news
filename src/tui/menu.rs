@@ -1,13 +1,14 @@
 use clap::ArgMatches;
 use inquire::Select;
+use colored::*;
 use std::{error::Error, process::exit, str::FromStr};
 
 use crate::{
     args::get_command,
     lang::Lang,
     scrape::{
-        issues::{get_issues, get_latest_issue, Issue},
-        link::{get_news_by_lang_and_resume, get_news_by_lang_and_show},
+        issues::{get_issues, get_latest_issue, Issue, get_last_issue},
+        link::{get_news_by_lang_and_resume, get_news_by_lang_and_show, get_lang_news},
     },
     utils::constants::VERSION,
 };
@@ -107,6 +108,32 @@ pub fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
         exit(0);
     }
 
+    if args.subcommand().is_some() {
+        let list = args.subcommand().unwrap();
+        let value = list.1.get_one::<String>("language").unwrap();
+        let lang = match Lang::from_str(value) {
+            Ok(lang) => lang,
+            Err(_) => {
+                println!("Lang is not valid");
+                exit(1);
+            }
+        };
+
+        let issue = get_last_issue(&lang)?;
+
+        let news_array = get_lang_news(&lang, &issue)?;
+
+        for new in news_array {
+            println!("{}",  new.title.blue());
+            println!("{} {}", "->".bright_green(), new.link);
+            println!();
+        }
+
+
+
+        exit(0);
+    }
+
     if args.get_flag("resume") {
         check_ultimate_news(None, true)?;
         exit(0);
@@ -121,7 +148,7 @@ pub fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
         lang_news(&args)?;
     }
 
-    if args.get_flag("list") {
+    if args.get_flag("support") {
         list_langs();
     }
 
@@ -218,5 +245,6 @@ pub fn check_ultimate_news(language: Option<Lang>, ai_resume: bool) -> Result<()
             }
         }
     }
+
     Ok(())
 }
