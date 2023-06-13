@@ -15,6 +15,13 @@ A nice, fast, confortable terminal CLI to check developer news
 
 ## [📦] Installation 
 
+### With Cargo
+
+```bash
+cargo install news_cli
+# news --help
+```
+
 ### Macos and Linux
 
 ```bash
