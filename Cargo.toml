@@ -1,5 +1,5 @@
 [package]
-name = "news"
+name = "news_cli"
 version = "1.3.0"
 edition = "2021"
 description = "A CLI to see developer news in the terminal 🐢"
@@ -30,3 +30,8 @@ strip = true
 opt-level = "s"
 lto = true
 codegen-units = 1
+
+
+[[bin]]
+name = "news"
+path = "src/main.rs"
