@@ -4,16 +4,16 @@ A nice, fast, confortable terminal CLI to check developer news
 
 <img src="./assets/news_cli.gif" width="800">
 
-## [:hammer_and_wrench:] Features
+## [🛠] Features
 
-* :rocket: Support for Linux, Windows and Mac 
-* :tv: Open youtube if resource of new is a video
-* :blue_book: Markdown like way to watch news in terminal
-* :globe_with_meridians: open browser instead of terminal
-* :brain: Ia summary of a new
-* :mag: Search across news list
+* 🚀 Support for Linux, Windows and Mac 
+* 📺 Open youtube if resource of new is a video
+* 📘 Markdown like way to watch news in terminal
+* 🌎 open browser instead of terminal
+* 🧠 Ia summary of a new
+* 🔎 Search across news list
 
-## [:package:] Installation 
+## [📦] Installation 
 
 ### Macos and Linux
 
