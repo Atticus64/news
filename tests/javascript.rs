@@ -1,4 +1,4 @@
-use news::scrape::link::get_js_news;
+use news_cli::scrape::link::get_js_news;
 
 #[test]
 fn test_get_js_news() {

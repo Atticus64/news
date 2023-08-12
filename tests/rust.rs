@@ -1,4 +1,4 @@
-use news::scrape::issues::rust::get_rs_issues_news;
+use news_cli::scrape::issues::rust::get_rs_issues_news;
 
 #[test]
 fn test_get_js_news() {

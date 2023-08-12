@@ -6,7 +6,7 @@ use crate::{
     lang::Lang,
     page::markdown::{get_markdown_content, show_news},
     scrape::ia::get_ia_new_resume,
-    tui::select::get_answer_str,
+    tui::select::get_answer,
 };
 
 use super::issues::Issue;
@@ -40,7 +40,7 @@ pub fn get_news_by_lang_and_show(lang: &Lang, novelty: &Issue) -> Result<(), Box
         Lang::Cpp => get_cpp_news(novelty.link.as_str())?,
     };
 
-    let answer = get_answer_str("What new do you like to watch?", options, "No new provided");
+    let answer = get_answer("What new do you like to watch?", options, "No new provided");
 
     let new_struct = news.iter().find(|new| new.title == answer);
 
@@ -59,7 +59,7 @@ pub fn get_news_by_lang_and_resume(lang: &Lang, novelty: &Issue) -> Result<(), B
         Lang::Cpp => get_cpp_news(novelty.link.as_str())?,
     };
 
-    let answer = get_answer_str("What new do you like to watch?", options, "No new provided");
+    let answer = get_answer("What new do you like to watch?", options, "No new provided");
 
     let new_struct = news.iter().find(|new| new.title == answer);
 

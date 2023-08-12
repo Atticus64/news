@@ -13,7 +13,7 @@ use crate::{
     utils::constants::VERSION,
 };
 
-use super::select::{get_answer, get_answer_str};
+use super::select::get_answer;
 
 pub fn lang_menu() -> Lang {
     let langs = vec![
@@ -40,7 +40,7 @@ pub fn novelty_menu(
     lang: &Lang,
     ia_resumable: bool,
 ) -> Result<(), Box<dyn Error>> {
-    let novelty = get_answer_str(
+    let novelty = get_answer(
         "Which new would you like to watch?",
         options_issues,
         "no novelty provided",
@@ -90,25 +90,29 @@ pub fn all_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn today_news(args: &ArgMatches) -> Result<(), Box<dyn Error>> {
+	if args.get_flag("resume") && args.contains_id("lang") {
+		let lang_str = args.get_one::<String>("lang").expect("No string for lang");
+		let lang = Lang::from_str(lang_str).unwrap();
+
+		check_ultimate_news(Some(lang), true)?;
+		exit(0);
+	} else if args.get_flag("resume") {
+			check_ultimate_news(None, true)?;
+			exit(0);
+	}
+
+	check_ultimate_news(None, false)?;
+	exit(0);
+}
+
 /// Manage cases of flags in app
 pub fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
     if args.subcommand_matches("today").is_some() {
-        if args.get_flag("resume") && args.contains_id("lang") {
-            let lang_str = args.get_one::<String>("lang").expect("No string for lang");
-            let lang = Lang::from_str(lang_str).unwrap();
-
-            check_ultimate_news(Some(lang), true)?;
-            exit(0);
-        } else if args.get_flag("resume") {
-            check_ultimate_news(None, true)?;
-            exit(0);
-        }
-
-        check_ultimate_news(None, false)?;
-        exit(0);
+				today_news(&args)?;
     }
 
-    if args.subcommand().is_some() {
+    if args.subcommand_matches("list").is_some() {
         let list = args.subcommand().unwrap();
         let value = list.1.get_one::<String>("language").unwrap();
         let lang = match Lang::from_str(value) {
@@ -128,8 +132,6 @@ pub fn manage_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
             println!("{} {}", "->".bright_green(), new.link);
             println!();
         }
-
-
 
         exit(0);
     }
@@ -198,51 +200,49 @@ pub fn list_langs() {
     exit(0)
 }
 
+fn news_with_lang(lang: &Lang, ia_resumable: bool) -> Result<bool, Box<dyn Error>> {
+	let issue = get_latest_issue(lang)?;
+
+	if ia_resumable {
+			get_news_by_lang_and_resume(lang, &issue)?;
+	} else {
+			get_news_by_lang_and_show(lang, &issue)?;
+	}
+
+	let phrase = "Do you want to search more news?".to_string();
+
+	let wants_research_lang = Select::new(&phrase, vec!["No", "Yes"])
+			.with_help_message("Select Yes or No")
+			.prompt()
+			.unwrap_or("Cancel");
+
+	if wants_research_lang == "Cancel" || wants_research_lang == "No" {
+			Ok(false)
+	} else {
+			Ok(true)
+	}
+}
+
 pub fn check_ultimate_news(language: Option<Lang>, ai_resume: bool) -> Result<(), Box<dyn Error>> {
     if language.is_none() {
         loop {
             let lang = lang_menu();
 
-            let issue = get_latest_issue(&lang)?;
+						let research = news_with_lang(&lang, ai_resume)?;
 
-            if ai_resume {
-                get_news_by_lang_and_resume(&lang, &issue)?;
-            } else {
-                get_news_by_lang_and_show(&lang, &issue)?;
-            }
+						if !research {
+							break
+						}
 
-            let phrase = "Do you want to search more news?".to_string();
-
-            let wants_research_lang = Select::new(&phrase, vec!["No", "Yes"])
-                .with_help_message("Select Yes or No")
-                .prompt()
-                .unwrap_or("Cancel");
-
-            if wants_research_lang == "Cancel" || wants_research_lang == "No" {
-                break;
-            }
         }
     } else {
         loop {
-            let lang = language.as_ref().expect("Failed to as ref lang");
-            let issue = get_latest_issue(lang)?;
-
-            if ai_resume {
-                get_news_by_lang_and_resume(lang, &issue)?;
-            } else {
-                get_news_by_lang_and_show(lang, &issue)?;
-            }
-
-            let phrase = "Do you want to search more news?".to_string();
-
-            let wants_research_lang = Select::new(&phrase, vec!["No", "Yes"])
-                .with_help_message("Select Yes or No")
-                .prompt()
-                .unwrap_or("Cancel");
-
-            if wants_research_lang == "Cancel" || wants_research_lang == "No" {
-                break;
-            }
+					let l = language.as_ref().unwrap();
+          let research = news_with_lang(l, ai_resume)?;
+					if !research {
+						break
+					}
+          
         }
     }
 
