@@ -164,6 +164,10 @@ pub fn get_rs_news(url: &str) -> Result<(Vec<NewsLink>, Vec<String>), Box<dyn Er
                 }
 
                 if !text.is_empty() {
+                    let low_text = text.to_lowercase();
+                    if low_text.contains("meetup") || href.contains("meetup") {
+                        continue; 
+                    }
                     let new = NewsLink {
                         title: text.trim().to_string(),
                         link: href.to_string(),
