@@ -5,6 +5,11 @@ use news_cli::get_news;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    get_news()?;
+    match get_news() {
+        Ok(_) => {},
+        Err(_e) => {
+           println!("Ocurrio un error")
+        }
+    }
     Ok(())
 }

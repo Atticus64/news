@@ -52,6 +52,7 @@ pub fn get_rs_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>>
         let title = format!("{title_raw} - {date_raw}");
         let new = Issue { title, link };
         vec_issues.push(new);
+
     }
 
     let issues_options = vec_issues.iter().map(|new| new.title.clone()).collect();

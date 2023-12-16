@@ -8,7 +8,7 @@ use crate::{
     lang::Lang,
     scrape::{
         issues::{get_issues, get_latest_issue, Issue, get_last_issue},
-        link::{get_news_by_lang_and_resume, get_news_by_lang_and_show, get_lang_news},
+        link::{get_news_by_lang_and_summary, get_news_by_lang_and_show, get_lang_news},
     },
     utils::constants::VERSION,
 };
@@ -38,7 +38,7 @@ pub fn novelty_menu(
     issues: Vec<Issue>,
     options_issues: Vec<String>,
     lang: &Lang,
-    ia_resumable: bool,
+    ia_summary: bool,
 ) -> Result<(), Box<dyn Error>> {
     let novelty = get_answer(
         "Which new would you like to watch?",
@@ -56,8 +56,8 @@ pub fn novelty_menu(
         }
     };
 
-    if ia_resumable {
-        get_news_by_lang_and_resume(lang, new)?;
+    if ia_summary {
+        get_news_by_lang_and_summary(lang, new)?;
     } else {
         get_news_by_lang_and_show(lang, new)?;
     }
@@ -71,9 +71,9 @@ pub fn all_news(args: ArgMatches) -> Result<(), Box<dyn Error>> {
 
         let (issues, issues_options) = get_issues(&lang)?;
 
-        let ia_resumable = args.get_flag("resume");
+        let ia_summary = args.get_flag("resume");
 
-        novelty_menu(issues, issues_options, &lang, ia_resumable)?;
+        novelty_menu(issues, issues_options, &lang, ia_summary)?;
 
         let phrase = "Do you want to search more news?".to_string();
 
@@ -204,7 +204,7 @@ fn news_with_lang(lang: &Lang, ia_resumable: bool) -> Result<bool, Box<dyn Error
 	let issue = get_latest_issue(lang)?;
 
 	if ia_resumable {
-			get_news_by_lang_and_resume(lang, &issue)?;
+			get_news_by_lang_and_summary(lang, &issue)?;
 	} else {
 			get_news_by_lang_and_show(lang, &issue)?;
 	}
@@ -228,20 +228,20 @@ pub fn check_ultimate_news(language: Option<Lang>, ai_resume: bool) -> Result<()
         loop {
             let lang = lang_menu();
 
-						let research = news_with_lang(&lang, ai_resume)?;
+            let research = news_with_lang(&lang, ai_resume)?;
 
-						if !research {
-							break
-						}
+            if !research {
+                break
+            }
 
         }
     } else {
         loop {
-					let l = language.as_ref().unwrap();
-          let research = news_with_lang(l, ai_resume)?;
-					if !research {
-						break
-					}
+            let l = language.as_ref().unwrap();
+            let research = news_with_lang(l, ai_resume)?;
+            if !research {
+                break
+            }
           
         }
     }
