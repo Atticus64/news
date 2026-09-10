@@ -19,7 +19,7 @@ pub fn get_py_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>>
 
     let doc = Document::from(text);
 
-    let issues = doc.select(".my-1");
+    let issues = doc.select(".my-2");
 
     let mut vec_issues: Vec<Issue> = vec![];
     for issue in issues {
@@ -68,7 +68,7 @@ pub fn get_latest_py_issue() -> Result<Issue, Box<dyn Error>> {
 
     let doc = Document::from(text);
 
-    let issues = doc.select(".my-1");
+    let issues = doc.select(".my-2");
 
     let issue = issues.first().expect("Failed to get first issue");
 

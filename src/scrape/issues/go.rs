@@ -19,7 +19,7 @@ pub fn get_go_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>>
 
     let doc = Document::from(text);
 
-    let issues = doc.select(".issue");
+    let issues = doc.select(".issue-subject");
 
     let mut vec_issues: Vec<Issue> = vec![];
     for issue in issues {
@@ -56,7 +56,7 @@ pub fn get_latest_go_issue() -> Result<Issue, Box<dyn Error>> {
 
     let doc = Document::from(text);
 
-    let issues = doc.select(".issue");
+    let issues = doc.select(".issue-subject");
     let first = issues.first().expect("Fail to get first issue");
 
     let url = first

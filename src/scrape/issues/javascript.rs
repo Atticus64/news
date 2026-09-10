@@ -16,7 +16,7 @@ pub fn get_js_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>>
 
     let doc = Document::from(text);
 
-    let issues = doc.select(".issue");
+    let issues = doc.select(".issue-subject");
 
     let mut vec_issues: Vec<Issue> = vec![];
     for issue in issues {
@@ -81,7 +81,7 @@ pub fn get_latest_js_issue() -> Result<Issue, Box<dyn Error>> {
 
     let doc = Document::from(text);
 
-    let issue = doc.select(".issue");
+    let issue = doc.select(".issue-subject");
 
     let first = issue.first().expect("Failed to get first issue");
 

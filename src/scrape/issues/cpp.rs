@@ -7,7 +7,7 @@ use crate::scrape::link::get_html;
 
 use super::Issue;
 
-const CPP_WEEKLY: &str = "https://cpp.libhunt.com/newsletter/archive";
+const CPP_WEEKLY: &str = "https://www.cppstories.com/p/archive/";
 
 pub fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>> {
     let handle = SpinnerBuilder::new()
@@ -19,7 +19,7 @@ pub fn get_cpp_issues_news() -> Result<(Vec<Issue>, Vec<String>), Box<dyn Error>
 
     let doc = Document::from(text);
 
-    let mut issues = doc.select("tr");
+    let mut issues = doc.select("a");
     let mut vec_issues: Vec<Issue> = vec![];
     issues.remove(0);
     for issue in issues {
@@ -122,7 +122,7 @@ pub fn get_latest_cpp_issue() -> Result<Issue, Box<dyn Error>> {
 
     let doc = Document::from(text);
 
-    let mut issues = doc.select("tr");
+    let mut issues = doc.select("li");
 
     issues.remove(0);
     let first = issues.first().expect("Failed get first issue");
